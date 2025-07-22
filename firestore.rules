@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Function to check if user owns the document being created
+    function isOwnerOnCreate() {
+      return isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Function to check if user owns the existing document
+    function isOwnerOnUpdate() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    // Achievements collection rules
+    match /achievements/{achievementId} {
+      // Allow reading achievements owned by the current user
+      allow read: if isOwnerOnUpdate();
+      
+      // Allow creating achievements with the current user as owner
+      allow create: if isOwnerOnCreate() && 
+                   request.resource.data.keys().hasAll(['userId', 'participationType', 'topic', 'goal', 'date', 'status']) &&
+                   request.resource.data.userId == request.auth.uid;
+      
+      // Allow updating achievements owned by the current user
+      // Users can only update their own achievements and cannot change the userId
+      allow update: if isOwnerOnUpdate() && 
+                   request.resource.data.userId == resource.data.userId &&
+                   request.resource.data.userId == request.auth.uid;
+      
+      // Allow deleting achievements owned by the current user
+      allow delete: if isOwnerOnUpdate();
+    }
+    
+    // Users collection rules
+    match /users/{userId} {
+      // Users can read and write their own profile data
+      allow read, write: if isOwner(userId);
+      
+      // Allow users to create their own profile
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Departments collection rules (read-only for all authenticated users)
+    match /departments/{departmentId} {
+      allow read: if isAuthenticated();
+      
+      // Only allow writes if user is admin (you can extend this later)
+      allow write: if false; // For now, no one can write to departments
+    }
+    
+    // Allow admin operations (if you have admin users in the future)
+    // You can add admin-specific rules here
+    // match /admin/{document=**} {
+    //   allow read, write: if isAuthenticated() && 
+    //                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    // }
+  }
+}
