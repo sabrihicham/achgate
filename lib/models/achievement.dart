@@ -17,6 +17,9 @@ class Achievement {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String status; // pending, approved, rejected
+  final String? reviewedBy; // ID of admin who reviewed
+  final DateTime? reviewedAt; // When it was reviewed
+  final String? reviewNotes; // Review notes
 
   Achievement({
     this.id,
@@ -35,6 +38,9 @@ class Achievement {
     required this.createdAt,
     required this.updatedAt,
     this.status = 'pending',
+    this.reviewedBy,
+    this.reviewedAt,
+    this.reviewNotes,
   });
 
   // Convert Achievement to Map for Firestore
@@ -55,6 +61,9 @@ class Achievement {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
       'status': status,
+      'reviewedBy': reviewedBy,
+      'reviewedAt': reviewedAt != null ? Timestamp.fromDate(reviewedAt!) : null,
+      'reviewNotes': reviewNotes,
     };
   }
 
@@ -77,6 +86,11 @@ class Achievement {
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       updatedAt: (map['updatedAt'] as Timestamp).toDate(),
       status: map['status'] ?? 'pending',
+      reviewedBy: map['reviewedBy'],
+      reviewedAt: map['reviewedAt'] != null
+          ? (map['reviewedAt'] as Timestamp).toDate()
+          : null,
+      reviewNotes: map['reviewNotes'],
     );
   }
 
@@ -98,6 +112,9 @@ class Achievement {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? status,
+    String? reviewedBy,
+    DateTime? reviewedAt,
+    String? reviewNotes,
   }) {
     return Achievement(
       id: id ?? this.id,
@@ -116,6 +133,9 @@ class Achievement {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
+      reviewedBy: reviewedBy ?? this.reviewedBy,
+      reviewedAt: reviewedAt ?? this.reviewedAt,
+      reviewNotes: reviewNotes ?? this.reviewNotes,
     );
   }
 
@@ -127,37 +147,37 @@ class Achievement {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is Achievement &&
-      other.id == id &&
-      other.participationType == participationType &&
-      other.executiveDepartment == executiveDepartment &&
-      other.mainDepartment == mainDepartment &&
-      other.subDepartment == subDepartment &&
-      other.topic == topic &&
-      other.goal == goal &&
-      other.date == date &&
-      other.location == location &&
-      other.duration == duration &&
-      other.impact == impact &&
-      other.userId == userId &&
-      other.status == status;
+        other.id == id &&
+        other.participationType == participationType &&
+        other.executiveDepartment == executiveDepartment &&
+        other.mainDepartment == mainDepartment &&
+        other.subDepartment == subDepartment &&
+        other.topic == topic &&
+        other.goal == goal &&
+        other.date == date &&
+        other.location == location &&
+        other.duration == duration &&
+        other.impact == impact &&
+        other.userId == userId &&
+        other.status == status;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      participationType.hashCode ^
-      executiveDepartment.hashCode ^
-      mainDepartment.hashCode ^
-      subDepartment.hashCode ^
-      topic.hashCode ^
-      goal.hashCode ^
-      date.hashCode ^
-      location.hashCode ^
-      duration.hashCode ^
-      impact.hashCode ^
-      userId.hashCode ^
-      status.hashCode;
+        participationType.hashCode ^
+        executiveDepartment.hashCode ^
+        mainDepartment.hashCode ^
+        subDepartment.hashCode ^
+        topic.hashCode ^
+        goal.hashCode ^
+        date.hashCode ^
+        location.hashCode ^
+        duration.hashCode ^
+        impact.hashCode ^
+        userId.hashCode ^
+        status.hashCode;
   }
 }

@@ -28,6 +28,15 @@ service cloud.firestore {
              get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.isActive == true;
     }
     
+    // TEMPORARY: Allow any authenticated user to add themselves to admin_users collection
+    // THIS SHOULD BE REMOVED AFTER INITIAL SETUP
+    function canCreateAdminDoc(userId) {
+      return isAuthenticated() && 
+             request.auth.uid == userId &&
+             request.resource.data.keys().hasAll(['isActive']) &&
+             request.resource.data.isActive == true;
+    }
+    
     // Achievements collection rules
     match /achievements/{achievementId} {
       // Allow reading achievements owned by the current user or if user is admin
@@ -63,22 +72,11 @@ service cloud.firestore {
       // Allow reading admin status for authenticated users (to check their own status)
       allow read: if isAuthenticated();
       
-      // Allow any authenticated user to create their own admin document
-      // This is necessary for initial admin setup
-      allow create: if isAuthenticated() && 
-                   request.auth.uid == userId &&
-                   request.resource.data.keys().hasAll(['isActive']);
+      // Allow admins to write to admin_users collection
+      allow write: if isAdmin();
       
-      // Allow admins to update admin documents, or users to update their own
-      allow update: if isAuthenticated() && 
-                   (request.auth.uid == userId || 
-                    (exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)) &&
-                     get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.isActive == true));
-      
-      // Only allow admins to delete admin documents
-      allow delete: if isAuthenticated() && 
-                   exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)) &&
-                   get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.isActive == true;
+      // TEMPORARY: Allow user to add themselves as admin (for initial setup)
+      allow create: if canCreateAdminDoc(userId);
     }
     
     // Departments collection rules (read-only for all authenticated users)

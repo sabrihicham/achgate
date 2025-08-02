@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../core/app_router.dart';
+import '../services/admin_service.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
@@ -15,7 +17,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _fadeController;
   late AnimationController _scaleController;
   late AnimationController _slideController;
-  
+
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   late Animation<Offset> _slideAnimation;
@@ -23,51 +25,40 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize animation controllers
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
 
     // Initialize animations
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.5,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _scaleController,
-      curve: Curves.elasticOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutBack,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
+        );
 
     // Start animations
     _startAnimations();
-    
+
     // Navigate after splash
     _navigateAfterSplash();
   }
@@ -75,30 +66,47 @@ class _SplashScreenState extends State<SplashScreen>
   void _startAnimations() async {
     await Future.delayed(const Duration(milliseconds: 300));
     _fadeController.forward();
-    
+
     await Future.delayed(const Duration(milliseconds: 200));
     _scaleController.forward();
-    
+
     await Future.delayed(const Duration(milliseconds: 200));
     _slideController.forward();
   }
 
   void _navigateAfterSplash() async {
     await Future.delayed(const Duration(milliseconds: 3000));
-    
+
     if (mounted) {
+      // Get the current route from ModalRoute
+      final currentRoute = ModalRoute.of(context)?.settings.name;
       final user = FirebaseAuth.instance.currentUser;
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return user != null ? const HomeScreen() : const LoginScreen();
-          },
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 500),
-        ),
-      );
+
+      // Check if user is trying to access admin route
+      if (currentRoute == '/admin' || currentRoute == AppRouter.admin) {
+        // For admin route, check if user is authenticated and has admin privileges
+        if (user != null) {
+          // Navigate directly to admin route which will handle admin verification
+          Navigator.of(context).pushReplacementNamed(AppRouter.admin);
+        } else {
+          // Not authenticated, redirect to admin login
+          Navigator.of(context).pushReplacementNamed(AppRouter.adminLogin);
+        }
+      } else {
+        // Regular navigation logic
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) {
+              return user != null ? const HomeScreen() : const LoginScreen();
+            },
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            transitionDuration: const Duration(milliseconds: 500),
+          ),
+        );
+      }
     }
   }
 
@@ -114,7 +122,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final isWeb = screenSize.width > 600;
-    
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -136,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen>
             children: [
               // Top spacer
               const Spacer(flex: 2),
-              
+
               // Main content
               Expanded(
                 flex: 6,
@@ -149,125 +157,18 @@ class _SplashScreenState extends State<SplashScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Portal Logo (Platform logo)
-                        AnimatedBuilder(
-                          animation: _fadeAnimation,
-                          builder: (context, child) {
-                            return FadeTransition(
-                              opacity: _fadeAnimation,
-                              child: ScaleTransition(
-                                scale: _scaleAnimation,
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 10),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Image.asset(
-                                    'assets/images/portal_logo_white.png',
-                                    width: isWeb ? 120 : screenSize.width * 0.25,
-                                    height: isWeb ? 120 : screenSize.width * 0.25,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        
-                        const SizedBox(height: 40),
-                        
-                        // Clustering Logo (Jeddah Health Cluster logo)
-                        SlideTransition(
-                          position: _slideAnimation,
-                          child: FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: Container(
-                              padding: const EdgeInsets.all(15),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
-                                    blurRadius: 15,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
-                              ),
-                              child: Image.asset(
-                                'assets/images/clustring_logo_colored.png',
-                                width: isWeb ? 200 : screenSize.width * 0.5,
-                                height: isWeb ? 80 : screenSize.width * 0.2,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 40),
-                        
-                        // App title
-                        SlideTransition(
-                          position: _slideAnimation,
-                          child: FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: Text(
-                              'تجمع جدة الصحي الثاني',
-                              style: TextStyle(
-                                fontSize: isWeb ? 28 : 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    offset: const Offset(0, 2),
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // Subtitle
-                        SlideTransition(
-                          position: _slideAnimation,
-                          child: FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: Text(
-                              'بوابة الإنجازات',
-                              style: TextStyle(
-                                fontSize: isWeb ? 18 : 16,
-                                color: Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w500,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    offset: const Offset(0, 1),
-                                    blurRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                        Image.asset(
+                          'assets/images/portal_logo_white.png',
+                          // width: isWeb ? 120 : screenSize.width * 0.9,
+                          // height: isWeb ? 120 : screenSize.width * 0.9,
+                          fit: BoxFit.cover,
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              
+
               // Loading indicator
               AnimatedBuilder(
                 animation: _fadeAnimation,
@@ -303,7 +204,15 @@ class _SplashScreenState extends State<SplashScreen>
                   );
                 },
               ),
-              
+
+              // Clustering Logo (Jeddah Health Cluster logo)
+              Image.asset(
+                'assets/images/clustring_logo_white.png',
+                width: isWeb ? 200 : screenSize.width * 0.5,
+                height: isWeb ? 80 : screenSize.width * 0.2,
+                fit: BoxFit.contain,
+              ),
+
               // Bottom spacer
               const Spacer(flex: 1),
             ],

@@ -1,6 +1,4 @@
-import 'package:achgate/view/add_achievement_screen.dart';
-import 'package:achgate/view/view_achievements_screen.dart';
-import 'package:achgate/view/splash_screen.dart';
+import 'package:achgate/core/app_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,10 +7,8 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Configure Google Fonts to use local assets as fallback
   GoogleFonts.config.allowRuntimeFetching = true;
@@ -29,11 +25,23 @@ class MyApp extends StatelessWidget {
       title: 'تجمع جدة الصحي الثاني',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      routes: {
-        '/add-achievement': (context) => const AddAchievementScreen(),
-        '/view-achievements': (context) => const ViewAchievementsScreen(),
+      initialRoute: AppRouter.splash,
+
+      onGenerateRoute: AppRouter.generateRoute,
+      onUnknownRoute: (settings) {
+        // Handle unknown routes
+        if (settings.name?.startsWith('/admin') == true) {
+          // If it's an admin route, redirect to admin
+          return AppRouter.generateRoute(
+            const RouteSettings(name: AppRouter.admin),
+          );
+        }
+
+        // Otherwise redirect to splash
+        return AppRouter.generateRoute(
+          const RouteSettings(name: AppRouter.splash),
+        );
       },
-      home: const SplashScreen(),
     );
   }
 }

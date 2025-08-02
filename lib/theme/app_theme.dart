@@ -10,7 +10,7 @@ class AppTheme {
       // Core configuration
       useMaterial3: true,
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      
+
       // Color scheme
       colorScheme: const ColorScheme.light(
         primary: AppColors.primaryDark,
@@ -28,11 +28,11 @@ class AppTheme {
         surfaceVariant: AppColors.surfaceVariant,
         onSurfaceVariant: AppColors.onSurfaceVariant,
       ),
-      
+
       // Typography
       textTheme: AppTypography.textTheme,
-      fontFamily: GoogleFonts.cairo().fontFamily, // Set Cairo as the default font family
-      
+      fontFamily: GoogleFonts.cairo()
+          .fontFamily, // Set Cairo as the default font family
       // Component themes
       elevatedButtonTheme: _elevatedButtonTheme,
       outlinedButtonTheme: _outlinedButtonTheme,
@@ -46,7 +46,7 @@ class AppTheme {
       progressIndicatorTheme: _progressIndicatorTheme,
       dividerTheme: _dividerTheme,
       iconTheme: _iconTheme,
-      
+
       // Scaffold and background
       scaffoldBackgroundColor: AppColors.background,
       canvasColor: AppColors.background,
@@ -56,95 +56,88 @@ class AppTheme {
   // Elevated Button Theme
   static ElevatedButtonThemeData get _elevatedButtonTheme {
     return ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryDark,
-        foregroundColor: AppColors.onPrimary,
-        elevation: AppSpacing.elevation2,
-        shadowColor: AppColors.primaryDark.withOpacity(0.3),
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-        textStyle: AppTypography.button,
-        minimumSize: const Size(120, 48),
-      ).copyWith(
-        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return AppColors.primaryMedium;
-            }
-            if (states.contains(MaterialState.pressed)) {
-              return AppColors.primaryDark.withOpacity(0.9);
-            }
-            if (states.contains(MaterialState.disabled)) {
-              return AppColors.disabled;
-            }
-            return AppColors.primaryDark;
-          },
-        ),
-        overlayColor: MaterialStateProperty.resolveWith<Color?>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return AppColors.primaryLight.withOpacity(0.1);
-            }
-            if (states.contains(MaterialState.pressed)) {
-              return AppColors.primaryLight.withOpacity(0.2);
-            }
-            return null;
-          },
-        ),
-      ),
+      style:
+          ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryDark,
+            foregroundColor: AppColors.onPrimary,
+            elevation: AppSpacing.elevation2,
+            shadowColor: AppColors.primaryDark.withOpacity(0.3),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+            textStyle: AppTypography.button,
+            minimumSize: const Size(120, 48),
+          ).copyWith(
+            backgroundColor: MaterialStateProperty.resolveWith<Color?>((
+              Set<MaterialState> states,
+            ) {
+              if (states.contains(MaterialState.hovered)) {
+                return AppColors.primaryMedium;
+              }
+              if (states.contains(MaterialState.pressed)) {
+                return AppColors.primaryDark.withOpacity(0.9);
+              }
+              if (states.contains(MaterialState.disabled)) {
+                return AppColors.disabled;
+              }
+              return AppColors.primaryDark;
+            }),
+            overlayColor: MaterialStateProperty.resolveWith<Color?>((
+              Set<MaterialState> states,
+            ) {
+              if (states.contains(MaterialState.hovered)) {
+                return AppColors.primaryLight.withOpacity(0.1);
+              }
+              if (states.contains(MaterialState.pressed)) {
+                return AppColors.primaryLight.withOpacity(0.2);
+              }
+              return null;
+            }),
+          ),
     );
   }
 
   // Outlined Button Theme
   static OutlinedButtonThemeData get _outlinedButtonTheme {
     return OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primaryDark,
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-        side: const BorderSide(
-          color: AppColors.primaryDark,
-          width: 1.5,
-        ),
-        textStyle: AppTypography.button,
-        minimumSize: const Size(120, 48),
-      ).copyWith(
-        side: MaterialStateProperty.resolveWith<BorderSide?>(
-          (Set<MaterialState> states) {
-            if (states.contains(MaterialState.hovered)) {
-              return const BorderSide(
-                color: AppColors.primaryMedium,
-                width: 2,
-              );
-            }
-            if (states.contains(MaterialState.disabled)) {
-              return const BorderSide(
-                color: AppColors.disabled,
-                width: 1,
-              );
-            }
-            return const BorderSide(
-              color: AppColors.primaryDark,
-              width: 1.5,
-            );
-          },
-        ),
-        textStyle: MaterialStateProperty.all(
-          AppTypography.textTheme.labelLarge?.copyWith(
-            color: AppColors.primaryDark,
+      style:
+          OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primaryDark,
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+            side: const BorderSide(color: AppColors.primaryDark, width: 1.5),
+            textStyle: AppTypography.button,
+            minimumSize: const Size(120, 48),
+          ).copyWith(
+            side: MaterialStateProperty.resolveWith<BorderSide?>((
+              Set<MaterialState> states,
+            ) {
+              if (states.contains(MaterialState.hovered)) {
+                return const BorderSide(
+                  color: AppColors.primaryMedium,
+                  width: 2,
+                );
+              }
+              if (states.contains(MaterialState.disabled)) {
+                return const BorderSide(color: AppColors.disabled, width: 1);
+              }
+              return const BorderSide(color: AppColors.primaryDark, width: 1.5);
+            }),
+            textStyle: MaterialStateProperty.all(
+              AppTypography.textTheme.labelLarge?.copyWith(
+                color: AppColors.primaryDark,
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -179,38 +172,23 @@ class AppTheme {
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(
-          color: AppColors.outline,
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: AppColors.outline, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(
-          color: AppColors.outline,
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: AppColors.outline, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(
-          color: AppColors.primaryMedium,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: AppColors.primaryMedium, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(
-          color: AppColors.error,
-          width: 1,
-        ),
+        borderSide: const BorderSide(color: AppColors.error, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(
-          color: AppColors.error,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: AppColors.error, width: 2),
       ),
       labelStyle: AppTypography.textTheme.bodyMedium?.copyWith(
         color: AppColors.onSurfaceVariant,
@@ -240,17 +218,37 @@ class AppTheme {
   // App Bar Theme
   static AppBarTheme get _appBarTheme {
     return AppBarTheme(
-      backgroundColor: AppColors.primaryDark,
+      backgroundColor: Colors.transparent,
       foregroundColor: AppColors.onPrimary,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: AppTypography.textTheme.headlineSmall?.copyWith(
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      titleTextStyle: AppTypography.textTheme.headlineMedium?.copyWith(
         color: AppColors.onPrimary,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.2,
+        fontSize: 24,
+        shadows: [
+          Shadow(
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+            color: Colors.black.withOpacity(0.3),
+          ),
+        ],
       ),
-      iconTheme: const IconThemeData(
+      iconTheme: const IconThemeData(color: AppColors.onPrimary, size: 24),
+      actionsIconTheme: const IconThemeData(
         color: AppColors.onPrimary,
-        size: 24,
+        size: 22,
+      ),
+      toolbarHeight: 85,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(0),
+          bottomRight: Radius.circular(0),
+        ),
       ),
     );
   }
@@ -258,14 +256,14 @@ class AppTheme {
   // Checkbox Theme
   static CheckboxThemeData get _checkboxTheme {
     return CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.selected)) {
-            return AppColors.primaryDark;
-          }
-          return AppColors.surfaceLight;
-        },
-      ),
+      fillColor: MaterialStateProperty.resolveWith<Color?>((
+        Set<MaterialState> states,
+      ) {
+        if (states.contains(MaterialState.selected)) {
+          return AppColors.primaryDark;
+        }
+        return AppColors.surfaceLight;
+      }),
       checkColor: MaterialStateProperty.all(AppColors.onPrimary),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
@@ -325,9 +323,6 @@ class AppTheme {
 
   // Icon Theme
   static IconThemeData get _iconTheme {
-    return const IconThemeData(
-      color: AppColors.onSurfaceVariant,
-      size: 24,
-    );
+    return const IconThemeData(color: AppColors.onSurfaceVariant, size: 24);
   }
 }

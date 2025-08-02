@@ -19,13 +19,17 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
   final AchievementService _achievementService = AchievementService();
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   String _selectedFilter = 'all';
   final TextEditingController _searchController = TextEditingController();
 
   final List<Map<String, dynamic>> _filterOptions = [
     {'value': 'all', 'label': 'جميع المنجزات', 'icon': Icons.list_alt},
-    {'value': 'pending', 'label': 'قيد المراجعة', 'icon': Icons.hourglass_empty},
+    {
+      'value': 'pending',
+      'label': 'قيد المراجعة',
+      'icon': Icons.hourglass_empty,
+    },
     {'value': 'approved', 'label': 'معتمدة', 'icon': Icons.check_circle},
     {'value': 'rejected', 'label': 'مرفوضة', 'icon': Icons.cancel},
   ];
@@ -42,13 +46,9 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
     Future.delayed(const Duration(milliseconds: 100), () {
       _fadeController.forward();
@@ -68,14 +68,38 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
       backgroundColor: AppColors.background,
       appBar: AppComponents.appBar(
         title: 'منجزاتي',
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+        showBackButton: true,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+            color: Colors.white,
+            splashRadius: 20,
+          ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: _showSearchDialog,
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.search_rounded),
+              onPressed: _showSearchDialog,
+              color: Colors.white,
+              splashRadius: 20,
+            ),
           ),
         ],
       ),
@@ -117,7 +141,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
         itemBuilder: (context, index) {
           final option = _filterOptions[index];
           final isSelected = _selectedFilter == option['value'];
-          
+
           return Container(
             margin: EdgeInsets.only(right: AppSpacing.sm),
             child: FilterChip(
@@ -139,7 +163,9 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
                   Text(
                     option['label'],
                     style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.primaryMedium,
+                      color: isSelected
+                          ? Colors.white
+                          : AppColors.primaryMedium,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -184,7 +210,11 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildCountItem('المجموع', counts['total']!, Icons.dashboard),
-              _buildCountItem('قيد المراجعة', counts['pending']!, Icons.hourglass_empty),
+              _buildCountItem(
+                'قيد المراجعة',
+                counts['pending']!,
+                Icons.hourglass_empty,
+              ),
               _buildCountItem('معتمد', counts['approved']!, Icons.check_circle),
               _buildCountItem('مرفوض', counts['rejected']!, Icons.cancel),
             ],
@@ -222,9 +252,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.primaryMedium,
-            ),
+            child: CircularProgressIndicator(color: AppColors.primaryMedium),
           );
         }
 
@@ -262,7 +290,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
         }
 
         final achievements = snapshot.data ?? [];
-        
+
         if (achievements.isEmpty) {
           return _buildEmptyState();
         }
@@ -282,7 +310,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
   Widget _buildEmptyState() {
     String message;
     IconData icon;
-    
+
     switch (_selectedFilter) {
       case 'pending':
         message = 'لا توجد منجزات قيد المراجعة';
@@ -328,7 +356,8 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
             ),
             SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
-              onPressed: () => Navigator.of(context).pushNamed('/add-achievement'),
+              onPressed: () =>
+                  Navigator.of(context).pushNamed('/add-achievement'),
               icon: const Icon(Icons.add),
               label: const Text('إضافة منجز جديد'),
               style: ElevatedButton.styleFrom(
@@ -412,9 +441,8 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
                           Expanded(
                             child: Text(
                               '${achievement.executiveDepartment} - ${achievement.mainDepartment}',
-                              style: AppTypography.textTheme.bodySmall!.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
+                              style: AppTypography.textTheme.bodySmall!
+                                  .copyWith(color: AppColors.onSurfaceVariant),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -595,7 +623,9 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تأكيد الحذف'),
-        content: const Text('هل أنت متأكد من حذف هذا المنجز؟ لا يمكن التراجع عن هذا الإجراء.'),
+        content: const Text(
+          'هل أنت متأكد من حذف هذا المنجز؟ لا يمكن التراجع عن هذا الإجراء.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -613,10 +643,10 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
 
   Future<void> _deleteAchievement(Achievement achievement) async {
     Navigator.of(context).pop(); // Close confirmation dialog
-    
+
     try {
       await _achievementService.deleteAchievement(achievement.id!);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -674,7 +704,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
     // TODO: Implement search functionality
     // For now, just clear the search controller
     _searchController.clear();
-    
+
     // In the future, implement search by updating the stream
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -720,17 +750,27 @@ class _AchievementDetailsDialog extends StatelessWidget {
               ),
               SizedBox(height: AppSpacing.lg),
               _buildDetailRow('نوع المشاركة', achievement.participationType),
-              _buildDetailRow('الإدارة التنفيذية', achievement.executiveDepartment),
+              _buildDetailRow(
+                'الإدارة التنفيذية',
+                achievement.executiveDepartment,
+              ),
               _buildDetailRow('الإدارة الرئيسية', achievement.mainDepartment),
               _buildDetailRow('الإدارة الفرعية', achievement.subDepartment),
-              _buildDetailRow('التاريخ', '${achievement.date.day}/${achievement.date.month}/${achievement.date.year}'),
+              _buildDetailRow(
+                'التاريخ',
+                '${achievement.date.day}/${achievement.date.month}/${achievement.date.year}',
+              ),
               _buildDetailRow('الموقع', achievement.location),
               _buildDetailRow('المدة', achievement.duration),
               _buildDetailRow('الموضوع', achievement.topic, isMultiline: true),
               _buildDetailRow('الهدف', achievement.goal, isMultiline: true),
               _buildDetailRow('الأثر', achievement.impact, isMultiline: true),
               if (achievement.attachments.isNotEmpty)
-                _buildDetailRow('المرفقات', achievement.attachments.join(', '), isMultiline: true),
+                _buildDetailRow(
+                  'المرفقات',
+                  achievement.attachments.join(', '),
+                  isMultiline: true,
+                ),
             ],
           ),
         ),
@@ -738,7 +778,11 @@ class _AchievementDetailsDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isMultiline = false}) {
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    bool isMultiline = false,
+  }) {
     return Padding(
       padding: EdgeInsets.only(bottom: AppSpacing.md),
       child: Column(

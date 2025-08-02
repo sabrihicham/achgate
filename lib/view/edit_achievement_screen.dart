@@ -95,13 +95,19 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
   // Get main departments list for selected executive department
   List<String> get _availableMainDepartments {
     if (_selectedExecutiveDepartment == null) return [];
-    return _departmentsService.getMainDepartments(_selectedExecutiveDepartment!);
+    return _departmentsService.getMainDepartments(
+      _selectedExecutiveDepartment!,
+    );
   }
 
   // Get sub departments list for selected main department
   List<String> get _availableSubDepartments {
-    if (_selectedExecutiveDepartment == null || _selectedMainDepartment == null) return [];
-    return _departmentsService.getSubDepartments(_selectedExecutiveDepartment!, _selectedMainDepartment!);
+    if (_selectedExecutiveDepartment == null || _selectedMainDepartment == null)
+      return [];
+    return _departmentsService.getSubDepartments(
+      _selectedExecutiveDepartment!,
+      _selectedMainDepartment!,
+    );
   }
 
   @override
@@ -118,13 +124,9 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
     Future.delayed(const Duration(milliseconds: 100), () {
       _fadeController.forward();
@@ -142,7 +144,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
 
   void _populateFormWithAchievementData() {
     final achievement = widget.achievement;
-    
+
     // Populate form fields
     _selectedParticipationType = achievement.participationType;
     _selectedExecutiveDepartment = achievement.executiveDepartment;
@@ -158,7 +160,8 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
     _subDepartmentController.text = achievement.subDepartment;
     _topicController.text = achievement.topic;
     _goalController.text = achievement.goal;
-    _dateController.text = '${achievement.date.day}/${achievement.date.month}/${achievement.date.year}';
+    _dateController.text =
+        '${achievement.date.day}/${achievement.date.month}/${achievement.date.year}';
     _locationController.text = achievement.location;
     _durationController.text = achievement.duration;
     _impactController.text = achievement.impact;
@@ -186,9 +189,20 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
       backgroundColor: AppColors.background,
       appBar: AppComponents.appBar(
         title: 'تعديل المنجز',
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+        showBackButton: true,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+            color: Colors.white,
+            splashRadius: 20,
+          ),
         ),
       ),
       body: SafeArea(
@@ -224,11 +238,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
-            color: AppColors.warning,
-            size: 24,
-          ),
+          Icon(Icons.info_outline, color: AppColors.warning, size: 24),
           SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
@@ -406,7 +416,10 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
           items: _departmentsData.keys.map((department) {
             return DropdownMenuItem<String>(
               value: department,
-              child: Text(department, style: AppTypography.textTheme.bodyMedium),
+              child: Text(
+                department,
+                style: AppTypography.textTheme.bodyMedium,
+              ),
             );
           }).toList(),
           onChanged: (value) {
@@ -441,9 +454,11 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
         SizedBox(height: AppSpacing.xs),
         DropdownButtonFormField<String>(
           value: _selectedMainDepartment,
-          decoration: _getInputDecoration(_selectedExecutiveDepartment == null 
-              ? 'اختر الإدارة التنفيذية أولاً' 
-              : 'اختر الإدارة الرئيسية'),
+          decoration: _getInputDecoration(
+            _selectedExecutiveDepartment == null
+                ? 'اختر الإدارة التنفيذية أولاً'
+                : 'اختر الإدارة الرئيسية',
+          ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'الإدارة الرئيسية مطلوبة';
@@ -453,17 +468,22 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
           items: _availableMainDepartments.map((department) {
             return DropdownMenuItem<String>(
               value: department,
-              child: Text(department, style: AppTypography.textTheme.bodyMedium),
+              child: Text(
+                department,
+                style: AppTypography.textTheme.bodyMedium,
+              ),
             );
           }).toList(),
-          onChanged: _selectedExecutiveDepartment == null ? null : (value) {
-            setState(() {
-              _selectedMainDepartment = value;
-              _selectedSubDepartment = null;
-              _mainDepartmentController.text = value ?? '';
-              _subDepartmentController.clear();
-            });
-          },
+          onChanged: _selectedExecutiveDepartment == null
+              ? null
+              : (value) {
+                  setState(() {
+                    _selectedMainDepartment = value;
+                    _selectedSubDepartment = null;
+                    _mainDepartmentController.text = value ?? '';
+                    _subDepartmentController.clear();
+                  });
+                },
           icon: const Icon(Icons.keyboard_arrow_down),
           isExpanded: true,
           style: AppTypography.textTheme.bodyMedium,
@@ -486,9 +506,11 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
         SizedBox(height: AppSpacing.xs),
         DropdownButtonFormField<String>(
           value: _selectedSubDepartment,
-          decoration: _getInputDecoration(_selectedMainDepartment == null 
-              ? 'اختر الإدارة الرئيسية أولاً' 
-              : 'اختر الإدارة الفرعية'),
+          decoration: _getInputDecoration(
+            _selectedMainDepartment == null
+                ? 'اختر الإدارة الرئيسية أولاً'
+                : 'اختر الإدارة الفرعية',
+          ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'الإدارة الفرعية مطلوبة';
@@ -498,15 +520,20 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
           items: _availableSubDepartments.map((department) {
             return DropdownMenuItem<String>(
               value: department,
-              child: Text(department, style: AppTypography.textTheme.bodyMedium),
+              child: Text(
+                department,
+                style: AppTypography.textTheme.bodyMedium,
+              ),
             );
           }).toList(),
-          onChanged: _selectedMainDepartment == null ? null : (value) {
-            setState(() {
-              _selectedSubDepartment = value;
-              _subDepartmentController.text = value ?? '';
-            });
-          },
+          onChanged: _selectedMainDepartment == null
+              ? null
+              : (value) {
+                  setState(() {
+                    _selectedSubDepartment = value;
+                    _subDepartmentController.text = value ?? '';
+                  });
+                },
           icon: const Icon(Icons.keyboard_arrow_down),
           isExpanded: true,
           style: AppTypography.textTheme.bodyMedium,
@@ -529,9 +556,9 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
         SizedBox(height: AppSpacing.xs),
         TextFormField(
           controller: _dateController,
-          decoration: _getInputDecoration('اختر التاريخ').copyWith(
-            suffixIcon: const Icon(Icons.calendar_today),
-          ),
+          decoration: _getInputDecoration(
+            'اختر التاريخ',
+          ).copyWith(suffixIcon: const Icon(Icons.calendar_today)),
           readOnly: true,
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -549,9 +576,9 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
               builder: (context, child) {
                 return Theme(
                   data: Theme.of(context).copyWith(
-                    colorScheme: Theme.of(context).colorScheme.copyWith(
-                      primary: AppColors.primaryMedium,
-                    ),
+                    colorScheme: Theme.of(
+                      context,
+                    ).colorScheme.copyWith(primary: AppColors.primaryMedium),
                   ),
                   child: child!,
                 );
@@ -561,7 +588,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
             if (pickedDate != null) {
               setState(() {
                 _selectedDate = pickedDate;
-                _dateController.text = 
+                _dateController.text =
                     '${pickedDate.day}/${pickedDate.month}/${pickedDate.year}';
               });
             }
@@ -685,45 +712,51 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
                   ),
                   if (_selectedFiles.isNotEmpty) ...[
                     SizedBox(height: AppSpacing.md),
-                    ..._selectedFiles.map((file) => Container(
-                      margin: EdgeInsets.only(bottom: AppSpacing.xs),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: AppSpacing.xs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.attach_file,
-                            size: 16,
-                            color: AppColors.primaryMedium,
-                          ),
-                          SizedBox(width: AppSpacing.xs),
-                          Expanded(
-                            child: Text(
-                              file,
-                              style: AppTypography.textTheme.bodySmall,
+                    ..._selectedFiles
+                        .map(
+                          (file) => Container(
+                            margin: EdgeInsets.only(bottom: AppSpacing.xs),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                              vertical: AppSpacing.xs,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLight.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSm,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.attach_file,
+                                  size: 16,
+                                  color: AppColors.primaryMedium,
+                                ),
+                                SizedBox(width: AppSpacing.xs),
+                                Expanded(
+                                  child: Text(
+                                    file,
+                                    style: AppTypography.textTheme.bodySmall,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.close,
+                                    size: 16,
+                                    color: AppColors.error,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _selectedFiles.remove(file);
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.close,
-                              size: 16,
-                              color: AppColors.error,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _selectedFiles.remove(file);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    )).toList(),
+                        )
+                        .toList(),
                   ],
                 ],
               ),
@@ -859,7 +892,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
     setState(() {
       _selectedFiles.addAll(['ملف_جديد.pdf']);
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('تم اختيار ${_selectedFiles.length} ملف'),
@@ -901,7 +934,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
 
       // Update achievement in Firestore
       await _achievementService.updateAchievement(updatedAchievement);
-      
+
       setState(() {
         _isLoading = false;
       });
