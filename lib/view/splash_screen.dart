@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../core/app_router.dart';
-import '../services/admin_service.dart';
+import '../services/admin_auth_service.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
@@ -81,31 +81,69 @@ class _SplashScreenState extends State<SplashScreen>
       // Get the current route from ModalRoute
       final currentRoute = ModalRoute.of(context)?.settings.name;
       final user = FirebaseAuth.instance.currentUser;
+      final adminAuthService = AdminAuthService();
+
+      print('🔍 Current route: $currentRoute');
+      print('🔍 User authenticated: ${user != null}');
 
       // Check if user is trying to access admin route
       if (currentRoute == '/admin' || currentRoute == AppRouter.admin) {
+        print('🔍 Admin route detected');
         // For admin route, check if user is authenticated and has admin privileges
         if (user != null) {
-          // Navigate directly to admin route which will handle admin verification
-          Navigator.of(context).pushReplacementNamed(AppRouter.admin);
+          // Check if user has admin privileges
+          final isAdmin = await adminAuthService.isAdminLoggedIn();
+          print('🔍 Is admin logged in: $isAdmin');
+          
+          if (isAdmin) {
+            // User is authenticated admin, navigate to admin dashboard
+            Navigator.of(context).pushReplacementNamed(AppRouter.admin);
+          } else {
+            // User is authenticated but not admin, redirect to admin login
+            Navigator.of(context).pushReplacementNamed(AppRouter.adminLogin);
+          }
         } else {
           // Not authenticated, redirect to admin login
           Navigator.of(context).pushReplacementNamed(AppRouter.adminLogin);
         }
       } else {
-        // Regular navigation logic
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) {
-              return user != null ? const HomeScreen() : const LoginScreen();
-            },
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+        // Regular navigation logic - but first check if user is admin and should go to admin dashboard
+        if (user != null) {
+          // Check if this user is an admin
+          final isAdmin = await adminAuthService.isAdminLoggedIn();
+          print('🔍 Regular route but user is admin: $isAdmin');
+          
+          if (isAdmin) {
+            // Admin user accessing regular route, keep them in admin dashboard
+            Navigator.of(context).pushReplacementNamed(AppRouter.admin);
+          } else {
+            // Regular user, go to home
+            Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) {
+                  return const HomeScreen();
+                },
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
                   return FadeTransition(opacity: animation, child: child);
                 },
-            transitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
+                transitionDuration: const Duration(milliseconds: 300),
+              ),
+            );
+          }
+        } else {
+          // Not authenticated, go to login
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) {
+                return const LoginScreen();
+              },
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              transitionDuration: const Duration(milliseconds: 300),
+            ),
+          );
+        }
       }
     }
   }

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
-
 import '../theme/app_components.dart';
 import '../services/admin_service.dart';
 import '../services/auth_service.dart';
+import '../services/admin_auth_service.dart';
+import '../core/app_router.dart';
 import '../models/achievement.dart';
 import 'login_screen.dart';
 
@@ -20,6 +21,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     with TickerProviderStateMixin {
   final AdminService _adminService = AdminService();
   final AuthService _authService = AuthService();
+  final AdminAuthService _adminAuthService = AdminAuthService();
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -128,29 +130,35 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   Future<void> _checkAdminAccess() async {
     try {
-      final isAdmin = await _adminService.isCurrentUserAdmin();
+      // Use AdminAuthService for more reliable admin checking
+      final isAdmin = await _adminAuthService.isAdminLoggedIn();
+      print('🔍 Admin check result: $isAdmin');
+
       if (!isAdmin) {
+        print('❌ User is not admin, redirecting to admin login');
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
+          // Redirect to admin login instead of regular login
+          AppRouter.navigateToAdminLogin(context);
         }
         return;
       }
 
+      // User is admin, load admin data
       await _adminService.getUsersStatistics();
       setState(() {
         _isAdmin = true;
         _isLoading = false;
       });
+      print('✅ Admin access confirmed, dashboard loaded');
     } catch (e) {
+      print('❌ Error checking admin access: $e');
       setState(() {
         _isLoading = false;
       });
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('خطأ في التحقق من صلاحيات الإدارة: $e')),
-        );
+        // On error, redirect to admin login
+        AppRouter.navigateToAdminLogin(context);
       }
     }
   }

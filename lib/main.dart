@@ -29,11 +29,13 @@ class MyApp extends StatelessWidget {
 
       onGenerateRoute: AppRouter.generateRoute,
       onUnknownRoute: (settings) {
-        // Handle unknown routes
-        if (settings.name?.startsWith('/admin') == true) {
-          // If it's an admin route, redirect to admin
+        // Handle unknown routes more intelligently
+        print('🔍 Unknown route: ${settings.name}');
+
+        // If it's an admin route or admin-related, redirect to splash with admin context
+        if (settings.name?.contains('admin') == true) {
           return AppRouter.generateRoute(
-            const RouteSettings(name: AppRouter.admin),
+            const RouteSettings(name: AppRouter.splash),
           );
         }
 
