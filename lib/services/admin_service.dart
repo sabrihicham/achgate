@@ -42,7 +42,7 @@ class AdminService {
         final data = adminDoc.data();
         print('📋 Admin document data: $data');
 
-        // Check for required fields
+        // Check for required fields - handling both bool and string values
         final isActive = data?['isActive'];
         final role = data?['role'];
         final permissions = data?['permissions'];
@@ -51,9 +51,18 @@ class AdminService {
         print('👤 role field: $role');
         print('🔐 permissions field: $permissions');
 
-        print('🎯 Final admin status: $isActive');
+        // Handle both boolean and string values for isActive
+        bool adminStatus = false;
+        if (isActive is bool) {
+          adminStatus = isActive;
+        } else if (isActive is String) {
+          adminStatus = isActive.toLowerCase() == 'true';
+        } else if (isActive == true) {
+          adminStatus = true;
+        }
 
-        return isActive == 'true' ? true : false; // Ensure boolean return type
+        print('🎯 Final admin status: $adminStatus');
+        return adminStatus;
       } else {
         print('❌ Admin document does not exist for user: $userId');
 
@@ -100,11 +109,44 @@ class AdminService {
   }
 
   // Get all achievements for admin review
-  Stream<List<Achievement>> getAllAchievements() {
-    return _firestore
+  Stream<List<Achievement>> getAllAchievements() async* {
+    // First check if user is admin
+    try {
+      final isAdmin = await isCurrentUserAdmin();
+      if (!isAdmin) {
+        print('❌ User is not admin, cannot access all achievements');
+        throw Exception(
+          'خطأ في الصلاحيات: يجب أن تكون مديراً لعرض جميع المنجزات',
+        );
+      }
+
+      print('✅ Admin access confirmed, fetching all achievements...');
+    } catch (e) {
+      print('❌ Error checking admin status: $e');
+      throw Exception('خطأ في التحقق من صلاحيات المدير: $e');
+    }
+
+    yield* _firestore
         .collection(_achievementsCollection)
         .orderBy('createdAt', descending: true)
         .snapshots()
+        .handleError((error) {
+          print('❌ Error in getAllAchievements stream: $error');
+          if (error.toString().contains('permission-denied')) {
+            print('🔒 Permission denied - checking admin document...');
+            // Try to ensure admin document exists
+            final userId = _currentUserId;
+            if (userId != null) {
+              _createAdminDocument(userId).catchError((e) {
+                print('❌ Failed to create admin document: $e');
+              });
+            }
+            throw Exception(
+              'خطأ في الصلاحيات: تحقق من إعدادات المدير في قاعدة البيانات',
+            );
+          }
+          throw Exception('خطأ في تحميل المنجزات: $error');
+        })
         .map(
           (snapshot) => snapshot.docs
               .map((doc) => Achievement.fromMap(doc.data(), doc.id))
@@ -113,12 +155,30 @@ class AdminService {
   }
 
   // Get achievements by status
-  Stream<List<Achievement>> getAchievementsByStatus(String status) {
-    return _firestore
+  Stream<List<Achievement>> getAchievementsByStatus(String status) async* {
+    // First check if user is admin
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception(
+        'خطأ في الصلاحيات: يجب أن تكون مديراً لعرض المنجزات حسب الحالة',
+      );
+    }
+
+    yield* _firestore
         .collection(_achievementsCollection)
         .where('status', isEqualTo: status)
         .orderBy('createdAt', descending: true)
         .snapshots()
+        .handleError((error) {
+          print('❌ Error in getAchievementsByStatus: $error');
+          if (error.toString().contains('permission-denied')) {
+            print('🔒 Permission denied - user may not be admin');
+            throw Exception(
+              'خطأ في الصلاحيات: يجب أن تكون مديراً لعرض المنجزات حسب الحالة',
+            );
+          }
+          throw Exception('خطأ في تحميل المنجزات: $error');
+        })
         .map(
           (snapshot) => snapshot.docs
               .map((doc) => Achievement.fromMap(doc.data(), doc.id))
@@ -169,7 +229,7 @@ class AdminService {
   Future<Map<String, int>> getUsersStatistics() async {
     try {
       print('🔍 Getting admin statistics...');
-      
+
       // Check if current user is admin first
       final isAdmin = await isCurrentUserAdmin();
       if (!isAdmin) {
@@ -182,7 +242,9 @@ class AdminService {
       // Get users count (with better error handling)
       int totalUsers = 0;
       try {
-        final usersSnapshot = await _firestore.collection(_usersCollection).get();
+        final usersSnapshot = await _firestore
+            .collection(_usersCollection)
+            .get();
         totalUsers = usersSnapshot.size;
         print('📊 Total users: $totalUsers');
       } catch (e) {
@@ -191,14 +253,16 @@ class AdminService {
         totalUsers = 0;
       }
 
-      // Get achievements count (with better error handling) 
+      // Get achievements count (with better error handling)
       int totalAchievements = 0;
       int pendingAchievements = 0;
       int approvedAchievements = 0;
       int rejectedAchievements = 0;
 
       try {
-        final achievementsSnapshot = await _firestore.collection(_achievementsCollection).get();
+        final achievementsSnapshot = await _firestore
+            .collection(_achievementsCollection)
+            .get();
         totalAchievements = achievementsSnapshot.size;
 
         for (final doc in achievementsSnapshot.docs) {
@@ -227,9 +291,15 @@ class AdminService {
         try {
           final streamSnapshot = await getAllAchievements().first;
           totalAchievements = streamSnapshot.length;
-          pendingAchievements = streamSnapshot.where((a) => a.status == 'pending').length;
-          approvedAchievements = streamSnapshot.where((a) => a.status == 'approved').length;
-          rejectedAchievements = streamSnapshot.where((a) => a.status == 'rejected').length;
+          pendingAchievements = streamSnapshot
+              .where((a) => a.status == 'pending')
+              .length;
+          approvedAchievements = streamSnapshot
+              .where((a) => a.status == 'approved')
+              .length;
+          rejectedAchievements = streamSnapshot
+              .where((a) => a.status == 'rejected')
+              .length;
           print('📊 Got statistics from stream fallback');
         } catch (streamError) {
           print('❌ Stream fallback also failed: $streamError');
@@ -248,12 +318,12 @@ class AdminService {
       return result;
     } catch (e) {
       print('❌ Error getting statistics: $e');
-      
+
       // Return empty statistics with proper error indication
       if (e.toString().contains('غير مسموح')) {
         rethrow; // Re-throw permission errors
       }
-      
+
       // For other errors, return empty stats
       return {
         'totalUsers': 0,
@@ -310,5 +380,240 @@ class AdminService {
     } catch (e) {
       throw Exception('فشل في تحديث حالة المستخدم: $e');
     }
+  }
+
+  // Search achievements by query
+  Stream<List<Achievement>> searchAchievements(String query) async* {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً للبحث في المنجزات');
+    }
+
+    yield* _firestore
+        .collection(_achievementsCollection)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => Achievement.fromMap(doc.data(), doc.id))
+              .where(
+                (achievement) =>
+                    achievement.topic.toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ||
+                    achievement.goal.toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ||
+                    achievement.executiveDepartment.toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ||
+                    achievement.participationType.toLowerCase().contains(
+                      query.toLowerCase(),
+                    ),
+              )
+              .toList(),
+        );
+  }
+
+  // Filter achievements by department (detailed)
+  Stream<List<Achievement>> getAchievementsByDepartmentDetailed(
+    String department,
+  ) async* {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً لفلترة المنجزات');
+    }
+
+    yield* _firestore
+        .collection(_achievementsCollection)
+        .where('executiveDepartment', isEqualTo: department)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => Achievement.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
+  }
+
+  // Filter achievements by date range
+  Stream<List<Achievement>> getAchievementsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async* {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً لفلترة المنجزات');
+    }
+
+    yield* _firestore
+        .collection(_achievementsCollection)
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+        .where('date', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => Achievement.fromMap(doc.data(), doc.id))
+              .toList(),
+        );
+  }
+
+  // Get achievements with complex filtering
+  Stream<List<Achievement>> getFilteredAchievements({
+    String? status,
+    String? department,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? searchQuery,
+  }) async* {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً لفلترة المنجزات');
+    }
+
+    Query query = _firestore.collection(_achievementsCollection);
+
+    // Apply filters
+    if (status != null && status != 'all') {
+      query = query.where('status', isEqualTo: status);
+    }
+
+    if (department != null && department != 'all') {
+      query = query.where('executiveDepartment', isEqualTo: department);
+    }
+
+    if (startDate != null) {
+      query = query.where(
+        'date',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+      );
+    }
+
+    if (endDate != null) {
+      query = query.where(
+        'date',
+        isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+      );
+    }
+
+    // Order by creation date
+    query = query.orderBy('createdAt', descending: true);
+
+    yield* query.snapshots().map((snapshot) {
+      var achievements = snapshot.docs
+          .map(
+            (doc) =>
+                Achievement.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+          )
+          .toList();
+
+      // Apply text search filter if provided
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        achievements = achievements
+            .where(
+              (achievement) =>
+                  achievement.topic.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  ) ||
+                  achievement.goal.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  ) ||
+                  achievement.executiveDepartment.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  ) ||
+                  achievement.participationType.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  ),
+            )
+            .toList();
+      }
+
+      return achievements;
+    });
+  }
+
+  // Bulk operations
+  Future<void> bulkUpdateAchievementStatus(
+    List<String> achievementIds,
+    String status,
+  ) async {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً للتحديث المجمع');
+    }
+
+    final batch = _firestore.batch();
+
+    for (final id in achievementIds) {
+      final docRef = _firestore.collection(_achievementsCollection).doc(id);
+      batch.update(docRef, {
+        'status': status,
+        'reviewedAt': Timestamp.now(),
+        'reviewedBy': _currentUserId,
+      });
+    }
+
+    try {
+      await batch.commit();
+    } catch (e) {
+      throw Exception('فشل في التحديث المجمع: $e');
+    }
+  }
+
+  Future<void> bulkDeleteAchievements(List<String> achievementIds) async {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً للحذف المجمع');
+    }
+
+    final batch = _firestore.batch();
+
+    for (final id in achievementIds) {
+      final docRef = _firestore.collection(_achievementsCollection).doc(id);
+      batch.delete(docRef);
+    }
+
+    try {
+      await batch.commit();
+    } catch (e) {
+      throw Exception('فشل في الحذف المجمع: $e');
+    }
+  }
+
+  // Export achievements to CSV-like format
+  Future<List<Map<String, dynamic>>> exportAchievements({
+    String? status,
+    String? department,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً لتصدير المنجزات');
+    }
+
+    final achievements = await getFilteredAchievements(
+      status: status,
+      department: department,
+      startDate: startDate,
+      endDate: endDate,
+    ).first;
+
+    return achievements
+        .map(
+          (achievement) => {
+            'id': achievement.id,
+            'topic': achievement.topic,
+            'goal': achievement.goal,
+            'participationType': achievement.participationType,
+            'executiveDepartment': achievement.executiveDepartment,
+            'status': achievement.status,
+            'date': achievement.date.toString(),
+            'createdAt': achievement.createdAt.toString(),
+            'userId': achievement.userId,
+          },
+        )
+        .toList();
   }
 }

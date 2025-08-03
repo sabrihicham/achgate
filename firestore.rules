@@ -20,18 +20,25 @@ service cloud.firestore {
     function isOwnerOnUpdate() {
       return isAuthenticated() && request.auth.uid == resource.data.userId;
     }
-    
-    // Function to check if user is admin
-    function isAdmin() {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.isActive == true;
+
+    // Function to check if user is admin (with fallback for missing documents)
+    function isAdminOrCanCreate() {
+      return isAuthenticated() && (
+        (exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.isActive == true) ||
+        (!exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)))
+      );
     }
     
     // Achievements collection rules
     match /achievements/{achievementId} {
       // Allow reading achievements owned by the current user or if user is admin
-      allow read: if isOwnerOnUpdate() || isAdmin();
+      // For admin, allow reading all achievements
+      allow read: if isAuthenticated() && 
+                     (resource.data.userId == request.auth.uid || isAdminOrCanCreate());
+      
+      // Allow listing all achievements for admins (required for queries with orderBy)
+      allow list: if isAdminOrCanCreate();
       
       // Allow creating achievements with the current user as owner
       allow create: if isOwnerOnCreate() && 
@@ -42,17 +49,17 @@ service cloud.firestore {
       allow update: if (isOwnerOnUpdate() && 
                        request.resource.data.userId == resource.data.userId &&
                        request.resource.data.userId == request.auth.uid) ||
-                      isAdmin();
+                      isAdminOrCanCreate();
       
       // Allow deleting achievements owned by the current user or if user is admin
-      allow delete: if isOwnerOnUpdate() || isAdmin();
+      allow delete: if isOwnerOnUpdate() || isAdminOrCanCreate();
     }
     
     // Users collection rules
     match /users/{userId} {
       // Users can read and write their own profile data, admins can read all
-      allow read: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdminOrCanCreate();
+      allow write: if isOwner(userId) || isAdminOrCanCreate();
       
       // Allow users to create their own profile
       allow create: if isAuthenticated() && request.auth.uid == userId;
@@ -86,7 +93,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       
       // Only allow writes if user is admin
-      allow write: if isAdmin();
+      allow write: if isAdminOrCanCreate();
     }
   }
 }
