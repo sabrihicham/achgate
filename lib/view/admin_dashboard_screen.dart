@@ -8,8 +8,10 @@ import '../services/auth_service.dart';
 import '../services/admin_auth_service.dart';
 import '../core/app_router.dart';
 import '../models/achievement.dart';
+import '../widgets/users_management_widget.dart';
 import 'login_screen.dart';
 import 'edit_achievement_screen.dart';
+import 'profile_demo_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -85,7 +87,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   void initState() {
     super.initState();
     _initializeAnimations();
-    _scrollController.addListener(_onScroll);
+    // _scrollController.addListener(_onScroll);
     _checkAdminAccess();
   }
 
@@ -591,7 +593,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   const SizedBox(width: 12),
                   _buildModernAppBarButton(
                     icon: Icons.account_circle_outlined,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ProfileDemoScreen(),
+                        ),
+                      );
+                    },
                     tooltip: 'الملف الشخصي',
                   ),
                 ],
@@ -1357,51 +1365,1001 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   // Content sections for different sidebar items
   Widget _buildPendingAchievementsContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'الإنجازات المعلقة',
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: AppColors.onSurface,
-            fontWeight: FontWeight.bold,
+    return StreamBuilder<List<Achievement>>(
+      stream: _adminService.getAchievementsByStatus('pending'),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return _buildErrorState(
+            'حدث خطأ في تحميل المنجزات المعلقة: ${snapshot.error}',
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final pendingAchievements = snapshot.data ?? [];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Section
+            _buildQuickReviewHeader(pendingAchievements.length),
+            const SizedBox(height: 24),
+
+            // Quick Stats Section
+            _buildQuickReviewStats(pendingAchievements),
+            const SizedBox(height: 24),
+
+            // Filter and Sort Options
+            _buildQuickReviewFilters(),
+            const SizedBox(height: 24),
+
+            // Pending Achievements Content
+            if (pendingAchievements.isEmpty)
+              _buildEmptyPendingState()
+            else
+              _buildPendingAchievementsList(pendingAchievements),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildQuickReviewHeader(int pendingCount) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [warningColor, warningColor.withOpacity(0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: warningColor.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'المراجعة السريعة',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'مراجعة سريعة للمنجزات المعلقة ($pendingCount منجز)',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.pending_actions,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                if (pendingCount > 0) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$pendingCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickReviewStats(List<Achievement> pendingAchievements) {
+    final today = DateTime.now();
+    final urgent = pendingAchievements.where((a) {
+      final daysDiff = today.difference(a.createdAt).inDays;
+      return daysDiff >= 3; // اعتبر المنجز عاجل إذا مر عليه 3 أيام أو أكثر
+    }).length;
+
+    final thisWeek = pendingAchievements.where((a) {
+      final daysDiff = today.difference(a.createdAt).inDays;
+      return daysDiff <= 7;
+    }).length;
+
+    final departments = pendingAchievements
+        .map((a) => a.executiveDepartment)
+        .toSet()
+        .length;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 1024;
+        final isTablet = constraints.maxWidth > 768;
+
+        if (isDesktop) {
+          return Row(
+            children: [
+              Expanded(
+                child: _buildQuickStatCard(
+                  'عاجل',
+                  '$urgent',
+                  Icons.priority_high,
+                  Colors.red,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildQuickStatCard(
+                  'هذا الأسبوع',
+                  '$thisWeek',
+                  Icons.today,
+                  warningColor,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildQuickStatCard(
+                  'الإدارات',
+                  '$departments',
+                  Icons.business,
+                  AppColors.primaryMedium,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildQuickStatCard(
+                  'الإجمالي',
+                  '${pendingAchievements.length}',
+                  Icons.pending,
+                  AppColors.primaryDark,
+                ),
+              ),
+            ],
+          );
+        } else if (isTablet) {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildQuickStatCard(
+                      'عاجل',
+                      '$urgent',
+                      Icons.priority_high,
+                      Colors.red,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildQuickStatCard(
+                      'هذا الأسبوع',
+                      '$thisWeek',
+                      Icons.today,
+                      warningColor,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildQuickStatCard(
+                      'الإدارات',
+                      '$departments',
+                      Icons.business,
+                      AppColors.primaryMedium,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildQuickStatCard(
+                      'الإجمالي',
+                      '${pendingAchievements.length}',
+                      Icons.pending,
+                      AppColors.primaryDark,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        } else {
+          return Column(
+            children: [
+              _buildQuickStatCard(
+                'عاجل',
+                '$urgent',
+                Icons.priority_high,
+                Colors.red,
+              ),
+              const SizedBox(height: 12),
+              _buildQuickStatCard(
+                'هذا الأسبوع',
+                '$thisWeek',
+                Icons.today,
+                warningColor,
+              ),
+              const SizedBox(height: 12),
+              _buildQuickStatCard(
+                'الإدارات',
+                '$departments',
+                Icons.business,
+                AppColors.primaryMedium,
+              ),
+              const SizedBox(height: 12),
+              _buildQuickStatCard(
+                'الإجمالي',
+                '${pendingAchievements.length}',
+                Icons.pending,
+                AppColors.primaryDark,
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  String _quickReviewSortBy = 'date';
+  bool _showUrgentOnly = false;
+
+  Widget _buildQuickReviewFilters() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 768) {
+            return Row(
+              children: [
+                const Icon(Icons.tune, color: AppColors.primaryDark),
+                const SizedBox(width: 12),
+                Text(
+                  'فلترة سريعة',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Row(
+                  children: [
+                    _buildFilterChipWidget('الكل', !_showUrgentOnly, () {
+                      setState(() => _showUrgentOnly = false);
+                    }),
+                    const SizedBox(width: 8),
+                    _buildFilterChipWidget('العاجل فقط', _showUrgentOnly, () {
+                      setState(() => _showUrgentOnly = true);
+                    }),
+                    const SizedBox(width: 20),
+                    SizedBox(
+                      width: 150,
+                      child: DropdownButtonFormField<String>(
+                        value: _quickReviewSortBy,
+                        decoration: const InputDecoration(
+                          labelText: 'ترتيب حسب',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'date',
+                            child: Text('التاريخ'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'department',
+                            child: Text('الإدارة'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'priority',
+                            child: Text('الأولوية'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() => _quickReviewSortBy = value ?? 'date');
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          } else {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.tune, color: AppColors.primaryDark),
+                    const SizedBox(width: 12),
+                    Text(
+                      'فلترة سريعة',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    _buildFilterChipWidget('الكل', !_showUrgentOnly, () {
+                      setState(() => _showUrgentOnly = false);
+                    }),
+                    const SizedBox(width: 8),
+                    _buildFilterChipWidget('العاجل فقط', _showUrgentOnly, () {
+                      setState(() => _showUrgentOnly = true);
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: DropdownButtonFormField<String>(
+                    value: _quickReviewSortBy,
+                    decoration: const InputDecoration(
+                      labelText: 'ترتيب حسب',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'date', child: Text('التاريخ')),
+                      DropdownMenuItem(
+                        value: 'department',
+                        child: Text('الإدارة'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'priority',
+                        child: Text('الأولوية'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _quickReviewSortBy = value ?? 'date');
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterChipWidget(
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryDark
+              : AppColors.primaryLight.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryDark
+                : AppColors.primaryLight.withOpacity(0.3),
           ),
         ),
-        const SizedBox(height: 24),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _pendingAchievements.length,
-          itemBuilder: (context, index) {
-            final achievement = _pendingAchievements[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 16),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: warningColor.withOpacity(0.1),
-                  child: Icon(Icons.pending, color: warningColor),
-                ),
-                title: Text(achievement.topic),
-                subtitle: Text(achievement.goal),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () =>
-                          _approveAchievement(achievement.id ?? ''),
-                      icon: Icon(Icons.check, color: successColor),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : AppColors.primaryDark,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyPendingState() {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: successColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.check_circle_outline,
+              size: 64,
+              color: successColor,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'لا توجد منجزات معلقة!',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: AppColors.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'جميع المنجزات تم مراجعتها بنجاح',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppColors.onSurfaceVariant),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => setState(() => _selectedSidebarIndex = 2),
+            icon: const Icon(Icons.assignment),
+            label: const Text('عرض جميع المنجزات'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryDark,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPendingAchievementsList(List<Achievement> achievements) {
+    // تطبيق الفلاتر
+    var filteredAchievements = achievements;
+
+    if (_showUrgentOnly) {
+      final today = DateTime.now();
+      filteredAchievements = achievements.where((a) {
+        final daysDiff = today.difference(a.createdAt).inDays;
+        return daysDiff >= 3;
+      }).toList();
+    }
+
+    // ترتيب المنجزات
+    switch (_quickReviewSortBy) {
+      case 'date':
+        filteredAchievements.sort((a, b) {
+          return b.createdAt.compareTo(a.createdAt);
+        });
+        break;
+      case 'department':
+        filteredAchievements.sort(
+          (a, b) => a.executiveDepartment.compareTo(b.executiveDepartment),
+        );
+        break;
+      case 'priority':
+        final today = DateTime.now();
+        filteredAchievements.sort((a, b) {
+          final aDays = today.difference(a.createdAt).inDays;
+          final bDays = today.difference(b.createdAt).inDays;
+          return bDays.compareTo(aDays);
+        });
+        break;
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 1024) {
+          // Desktop: Grid view
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.5,
+            ),
+            itemCount: filteredAchievements.length,
+            itemBuilder: (context, index) => _buildPendingAchievementCard(
+              filteredAchievements[index],
+              isDesktop: true,
+            ),
+          );
+        } else if (constraints.maxWidth > 768) {
+          // Tablet: Single column with larger cards
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filteredAchievements.length,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _buildPendingAchievementCard(
+                filteredAchievements[index],
+                isTablet: true,
+              ),
+            ),
+          );
+        } else {
+          // Mobile: Compact list view
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filteredAchievements.length,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildPendingAchievementCard(
+                filteredAchievements[index],
+                isMobile: true,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildPendingAchievementCard(
+    Achievement achievement, {
+    bool isDesktop = false,
+    bool isTablet = false,
+    bool isMobile = false,
+  }) {
+    final today = DateTime.now();
+    final daysDiff = today.difference(achievement.createdAt).inDays;
+    final isUrgent = daysDiff >= 3;
+    final priorityColor = isUrgent
+        ? Colors.red
+        : daysDiff >= 1
+        ? warningColor
+        : successColor;
+
+    if (isMobile) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: priorityColor.withOpacity(0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: priorityColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    isUrgent
+                        ? 'عاجل'
+                        : daysDiff >= 1
+                        ? 'متوسط'
+                        : 'جديد',
+                    style: TextStyle(
+                      color: priorityColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
                     ),
-                    IconButton(
-                      onPressed: () => _rejectAchievement(achievement.id ?? ''),
-                      icon: Icon(Icons.close, color: errorColor),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  _formatDate(achievement.createdAt),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              achievement.topic,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              achievement.goal,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              achievement.executiveDepartment,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.primaryDark,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _approveAchievement(achievement.id ?? ''),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: const Text('موافق'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: successColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _rejectAchievement(achievement.id ?? ''),
+                    icon: const Icon(Icons.close, size: 18),
+                    label: const Text('رفض'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: errorColor,
+                      side: BorderSide(color: errorColor),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Desktop and Tablet view
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: priorityColor.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: priorityColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isUrgent ? Icons.priority_high : Icons.schedule,
+                  color: priorityColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isUrgent
+                          ? 'عاجل'
+                          : daysDiff >= 1
+                          ? 'متوسط الأولوية'
+                          : 'جديد',
+                      style: TextStyle(
+                        color: priorityColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      '${daysDiff == 0 ? 'اليوم' : '$daysDiff ${daysDiff == 1 ? 'يوم' : 'أيام'} مضت'}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               ),
-            );
-          },
+              Text(
+                _formatDate(achievement.createdAt),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            achievement.topic,
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            achievement.goal,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.onSurfaceVariant),
+            maxLines: isDesktop ? 3 : 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              achievement.executiveDepartment,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.primaryDark,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _approveAchievement(achievement.id ?? ''),
+                  icon: const Icon(Icons.check),
+                  label: const Text('موافقة'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: successColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _rejectAchievement(achievement.id ?? ''),
+                  icon: const Icon(Icons.close),
+                  label: const Text('رفض'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: errorColor,
+                    side: BorderSide(color: errorColor),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              if (isDesktop) ...[
+                const SizedBox(width: 12),
+                IconButton(
+                  onPressed: () => _showAchievementDetails(achievement),
+                  icon: const Icon(Icons.info_outline),
+                  tooltip: 'عرض التفاصيل',
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primaryLight.withOpacity(0.1),
+                    foregroundColor: AppColors.primaryDark,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'غير محدد';
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inDays == 0) {
+      return 'اليوم';
+    } else if (diff.inDays == 1) {
+      return 'أمس';
+    } else if (diff.inDays < 7) {
+      return '${diff.inDays} أيام مضت';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  void _showAchievementDetails(Achievement achievement) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.7,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'تفاصيل المنجز',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 16),
+              _buildDetailRow('الموضوع:', achievement.topic),
+              _buildDetailRow('الهدف:', achievement.goal),
+              _buildDetailRow('الإدارة:', achievement.executiveDepartment),
+              _buildDetailRow(
+                'تاريخ الإنشاء:',
+                _formatDate(achievement.createdAt),
+              ),
+              if (achievement.reviewNotes?.isNotEmpty == true)
+                _buildDetailRow('ملاحظات المراجعة:', achievement.reviewNotes!),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _approveAchievement(achievement.id ?? '');
+                      },
+                      icon: const Icon(Icons.check),
+                      label: const Text('موافقة'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: successColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _rejectAchievement(achievement.id ?? '');
+                      },
+                      icon: const Icon(Icons.close),
+                      label: const Text('رفض'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: errorColor,
+                        side: BorderSide(color: errorColor),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryDark,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1701,10 +2659,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   ),
                   items: const [
                     DropdownMenuItem(value: 'all', child: Text('جميع الحالات')),
-                    DropdownMenuItem(
-                      value: 'pending',
-                      child: Text('قيد المراجعة'),
-                    ),
+                    DropdownMenuItem(value: 'pending', child: Text('معلقة')),
                     DropdownMenuItem(value: 'approved', child: Text('معتمد')),
                     DropdownMenuItem(value: 'rejected', child: Text('مرفوض')),
                   ],
@@ -1921,7 +2876,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   String _getStatusFilterText(String value) {
     switch (value) {
       case 'pending':
-        return 'قيد المراجعة';
+        return 'معلقة';
       case 'approved':
         return 'معتمد';
       case 'rejected':
@@ -2079,7 +3034,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             const SizedBox(width: 16),
             Expanded(
               child: _buildStatCard(
-                'قيد المراجعة',
+                'معلقة',
                 pending.toString(),
                 Icons.pending_actions,
                 warningColor,
@@ -2135,7 +3090,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               const SizedBox(width: 16),
               Expanded(
                 child: _buildProgressCard(
-                  'قيد المراجعة',
+                  'معلقة',
                   total > 0
                       ? (pending / total * 100).toStringAsFixed(1) + '%'
                       : '0%',
@@ -2927,7 +3882,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     switch (status) {
       case 'pending':
         color = warningColor;
-        label = 'قيد المراجعة';
+        label = 'معلقة';
         icon = Icons.pending;
         break;
       case 'approved':
@@ -3392,39 +4347,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryDark,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.onSurface),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   String _getStatusText(String status) {
     switch (status) {
       case 'pending':
-        return 'قيد المراجعة';
+        return 'معلقة';
       case 'approved':
         return 'معتمد';
       case 'rejected':
@@ -3466,26 +4392,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   }
 
   Widget _buildUsersManagementContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'إدارة المستخدمين',
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: AppColors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 24),
-        const Center(
-          child: Text(
-            'قسم إدارة المستخدمين\n(قيد التطوير)',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, color: AppColors.onSurfaceVariant),
-          ),
-        ),
-      ],
-    );
+    return const UsersManagementWidget();
   }
 
   Widget _buildAnalyticsContent() {

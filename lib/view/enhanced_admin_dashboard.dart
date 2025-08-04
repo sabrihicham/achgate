@@ -73,7 +73,7 @@
 
 //   final List<AdminFilterOption> _achievementFilters = [
 //     const AdminFilterOption(label: 'الكل', value: 'all'),
-//     const AdminFilterOption(label: 'قيد المراجعة', value: 'pending'),
+//     const AdminFilterOption(label: 'معلقة', value: 'pending'),
 //     const AdminFilterOption(label: 'مقبول', value: 'approved'),
 //     const AdminFilterOption(label: 'مرفوض', value: 'rejected'),
 //   ];

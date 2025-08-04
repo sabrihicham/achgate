@@ -25,11 +25,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
 
   final List<Map<String, dynamic>> _filterOptions = [
     {'value': 'all', 'label': 'جميع المنجزات', 'icon': Icons.list_alt},
-    {
-      'value': 'pending',
-      'label': 'قيد المراجعة',
-      'icon': Icons.hourglass_empty,
-    },
+    {'value': 'pending', 'label': 'معلقة', 'icon': Icons.hourglass_empty},
     {'value': 'approved', 'label': 'معتمدة', 'icon': Icons.check_circle},
     {'value': 'rejected', 'label': 'مرفوضة', 'icon': Icons.cancel},
   ];
@@ -211,7 +207,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
             children: [
               _buildCountItem('المجموع', counts['total']!, Icons.dashboard),
               _buildCountItem(
-                'قيد المراجعة',
+                'معلقة',
                 counts['pending']!,
                 Icons.hourglass_empty,
               ),
@@ -313,7 +309,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
 
     switch (_selectedFilter) {
       case 'pending':
-        message = 'لا توجد منجزات قيد المراجعة';
+        message = 'لا توجد منجزات معلقة';
         icon = Icons.hourglass_empty;
         break;
       case 'approved':
@@ -511,7 +507,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
       default:
         backgroundColor = AppColors.warning.withOpacity(0.1);
         textColor = AppColors.warning;
-        label = 'قيد المراجعة';
+        label = 'معلقة';
         icon = Icons.hourglass_empty;
     }
 

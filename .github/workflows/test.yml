@@ -1,0 +1,77 @@
+name: Test Flutter App
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        channel: 'stable'
+
+    - name: Cache Flutter dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.pub-cache
+          **/.flutter-plugins
+          **/.flutter-plugins-dependencies
+          **/.dart_tool
+        key: ${{ runner.os }}-flutter-test-${{ hashFiles('**/pubspec.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-flutter-test-
+
+    - name: Get Flutter dependencies
+      run: flutter pub get
+
+    - name: Verify Flutter installation
+      run: flutter doctor -v
+
+    - name: Check code formatting
+      run: dart format --output=none --set-exit-if-changed .
+
+    - name: Analyze code
+      run: flutter analyze --no-fatal-infos
+
+    - name: Run unit tests
+      run: flutter test --reporter=expanded
+
+    - name: Test web build
+      run: |
+        flutter config --enable-web
+        flutter build web --release --web-renderer html --no-tree-shake-icons
+
+    - name: Check for build artifacts
+      run: |
+        if [ ! -d "build/web" ]; then
+          echo "❌ Build failed - no web directory found"
+          exit 1
+        fi
+        if [ ! -f "build/web/index.html" ]; then
+          echo "❌ Build failed - no index.html found"
+          exit 1
+        fi
+        echo "✅ Build successful - all artifacts present"
+
+    - name: Test file sizes
+      run: |
+        echo "📊 Build artifact sizes:"
+        find build/web -name "*.js" -exec ls -lh {} \;
+        find build/web -name "*.css" -exec ls -lh {} \;
+        
+        # Check if main.dart.js is too large (warning if > 5MB)
+        MAIN_JS_SIZE=$(find build/web -name "main.dart.js" -exec stat -f%z {} \;)
+        if [ $MAIN_JS_SIZE -gt 5242880 ]; then
+          echo "⚠️ Warning: main.dart.js is larger than 5MB ($MAIN_JS_SIZE bytes)"
+          echo "Consider code splitting or tree shaking"
+        fi

@@ -164,26 +164,41 @@ class AdminService {
       );
     }
 
-    yield* _firestore
-        .collection(_achievementsCollection)
-        .where('status', isEqualTo: status)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .handleError((error) {
-          print('❌ Error in getAchievementsByStatus: $error');
-          if (error.toString().contains('permission-denied')) {
-            print('🔒 Permission denied - user may not be admin');
-            throw Exception(
-              'خطأ في الصلاحيات: يجب أن تكون مديراً لعرض المنجزات حسب الحالة',
-            );
-          }
-          throw Exception('خطأ في تحميل المنجزات: $error');
-        })
-        .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Achievement.fromMap(doc.data(), doc.id))
-              .toList(),
-        );
+    try {
+      // Try the optimized query first (requires index)
+      yield* _firestore
+          .collection(_achievementsCollection)
+          .where('status', isEqualTo: status)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map(
+            (snapshot) => snapshot.docs
+                .map((doc) => Achievement.fromMap(doc.data(), doc.id))
+                .toList(),
+          );
+    } catch (e) {
+      print('❌ Error with indexed query: $e');
+      if (e.toString().contains('requires an index')) {
+        print('⚠️ Using fallback query without ordering...');
+        // Fallback: query without orderBy, then sort client-side
+        yield* _firestore
+            .collection(_achievementsCollection)
+            .where('status', isEqualTo: status)
+            .snapshots()
+            .map((snapshot) {
+              final achievements = snapshot.docs
+                  .map((doc) => Achievement.fromMap(doc.data(), doc.id))
+                  .toList();
+
+              // Sort client-side by createdAt descending
+              achievements.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              return achievements;
+            });
+      } else {
+        // Re-throw other errors
+        rethrow;
+      }
+    }
   }
 
   // Update achievement status
@@ -615,5 +630,164 @@ class AdminService {
           },
         )
         .toList();
+  }
+
+  // User Management Methods
+
+  // Get all users for admin
+  Stream<List<Map<String, dynamic>>> getAllUsersForAdmin() async* {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception(
+        'خطأ في الصلاحيات: يجب أن تكون مديراً لعرض جميع المستخدمين',
+      );
+    }
+
+    yield* _firestore
+        .collection(_usersCollection)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => {'id': doc.id, ...doc.data()})
+              .toList(),
+        );
+  }
+
+  // Get user by ID for admin
+  Future<Map<String, dynamic>?> getUserByIdForAdmin(String userId) async {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception(
+        'خطأ في الصلاحيات: يجب أن تكون مديراً لعرض بيانات المستخدمين',
+      );
+    }
+
+    try {
+      final doc = await _firestore
+          .collection(_usersCollection)
+          .doc(userId)
+          .get();
+      if (doc.exists) {
+        return {'id': doc.id, ...doc.data()!};
+      }
+      return null;
+    } catch (e) {
+      throw Exception('فشل في جلب بيانات المستخدم: $e');
+    }
+  }
+
+  // Update user status for admin
+  Future<void> updateUserStatusForAdmin(String userId, bool isActive) async {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception(
+        'خطأ في الصلاحيات: يجب أن تكون مديراً لتحديث حالة المستخدمين',
+      );
+    }
+
+    try {
+      await _firestore.collection(_usersCollection).doc(userId).update({
+        'isActive': isActive,
+        'updatedAt': Timestamp.now(),
+      });
+    } catch (e) {
+      throw Exception('فشل في تحديث حالة المستخدم: $e');
+    }
+  }
+
+  // Delete user for admin
+  Future<void> deleteUserForAdmin(String userId) async {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception('خطأ في الصلاحيات: يجب أن تكون مديراً لحذف المستخدمين');
+    }
+
+    try {
+      // Delete user document
+      await _firestore.collection(_usersCollection).doc(userId).delete();
+
+      // Also delete admin document if exists
+      final adminDoc = await _firestore
+          .collection(_adminUsersCollection)
+          .doc(userId)
+          .get();
+      if (adminDoc.exists) {
+        await _firestore.collection(_adminUsersCollection).doc(userId).delete();
+      }
+    } catch (e) {
+      throw Exception('فشل في حذف المستخدم: $e');
+    }
+  }
+
+  // Search users for admin
+  Stream<List<Map<String, dynamic>>> searchUsersForAdmin(String query) async* {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception(
+        'خطأ في الصلاحيات: يجب أن تكون مديراً للبحث في المستخدمين',
+      );
+    }
+
+    if (query.isEmpty) {
+      yield* getAllUsersForAdmin();
+      return;
+    }
+
+    yield* _firestore
+        .collection(_usersCollection)
+        .orderBy('email')
+        .startAt([query.toLowerCase()])
+        .endAt([query.toLowerCase() + '\uf8ff'])
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => {'id': doc.id, ...doc.data()})
+              .toList(),
+        );
+  }
+
+  // Get users statistics for admin
+  Future<Map<String, int>> getUsersStatisticsForAdmin() async {
+    final isAdmin = await isCurrentUserAdmin();
+    if (!isAdmin) {
+      throw Exception(
+        'خطأ في الصلاحيات: يجب أن تكون مديراً لعرض إحصائيات المستخدمين',
+      );
+    }
+
+    try {
+      final allUsers = await _firestore.collection(_usersCollection).get();
+
+      int totalUsers = allUsers.size;
+      int activeUsers = 0;
+      int adminUsers = 0;
+      int inactiveUsers = 0;
+
+      for (final doc in allUsers.docs) {
+        final data = doc.data();
+        final isActive = data['isActive'] ?? true;
+        final roles = List<String>.from(data['roles'] ?? ['user']);
+
+        if (isActive) {
+          activeUsers++;
+        } else {
+          inactiveUsers++;
+        }
+
+        if (roles.contains('admin') || roles.contains('super_admin')) {
+          adminUsers++;
+        }
+      }
+
+      return {
+        'total': totalUsers,
+        'active': activeUsers,
+        'inactive': inactiveUsers,
+        'admins': adminUsers,
+      };
+    } catch (e) {
+      throw Exception('فشل في جلب إحصائيات المستخدمين: $e');
+    }
   }
 }

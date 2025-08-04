@@ -13,6 +13,7 @@ import '../services/departments_service.dart';
 import '../models/achievement.dart';
 import 'edit_achievement_screen.dart';
 import 'view_achievements_screen.dart';
+import 'profile_demo_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -123,11 +124,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   final List<Map<String, dynamic>> _achievementFilterOptions = [
     {'value': 'all', 'label': 'جميع المنجزات', 'icon': Icons.list_alt},
-    {
-      'value': 'pending',
-      'label': 'قيد المراجعة',
-      'icon': Icons.hourglass_empty,
-    },
+    {'value': 'pending', 'label': 'معلقة', 'icon': Icons.hourglass_empty},
     {'value': 'approved', 'label': 'معتمدة', 'icon': Icons.check_circle},
     {'value': 'rejected', 'label': 'مرفوضة', 'icon': Icons.cancel},
   ];
@@ -195,10 +192,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       'index': 3,
     },
     {
+      'icon': Icons.person_outline,
+      'activeIcon': Icons.person,
+      'title': 'الملف الشخصي',
+      'index': 4,
+    },
+    {
       'icon': Icons.settings_outlined,
       'activeIcon': Icons.settings,
       'title': 'الإعدادات',
-      'index': 4,
+      'index': 5,
     },
   ];
 
@@ -1033,6 +1036,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 3:
         return _buildReportsContent();
       case 4:
+        return _buildProfileContent();
+      case 5:
         return _buildSettingsContent();
       default:
         return _buildDashboardContent();
@@ -1363,7 +1368,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(width: 16),
           Expanded(
             child: _buildQuickStatCard(
-              title: 'قيد المراجعة',
+              title: 'معلقة',
               value: '8',
               icon: Icons.pending_actions_rounded,
               color: AppColors.warning,
@@ -3899,6 +3904,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildProfileContent() {
+    return const ProfileDemoScreen();
+  }
+
   // Helper Methods
   String _getSectionTitle() {
     switch (_selectedSidebarIndex) {
@@ -3911,6 +3920,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 3:
         return 'التقارير والإحصائيات';
       case 4:
+        return 'الملف الشخصي';
+      case 5:
         return 'الإعدادات';
       default:
         return 'لوحة التحكم';
@@ -3928,6 +3939,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 3:
         return 'تقارير مفصلة وتحليلات';
       case 4:
+        return 'عرض وتحديث معلوماتك الشخصية';
+      case 5:
         return 'تخصيص إعدادات النظام';
       default:
         return 'مرحباً بك في نظام إدارة المنجزات';
@@ -4106,7 +4119,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               _buildCountItem('المجموع', counts['total']!, Icons.dashboard),
               _buildCountItem(
-                'قيد المراجعة',
+                'معلقة',
                 counts['pending']!,
                 Icons.hourglass_empty,
               ),
@@ -4208,7 +4221,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     switch (_selectedAchievementsFilter) {
       case 'pending':
-        message = 'لا توجد منجزات قيد المراجعة';
+        message = 'لا توجد منجزات معلقة';
         icon = Icons.hourglass_empty;
         break;
       case 'approved':
@@ -4403,7 +4416,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       default:
         backgroundColor = AppColors.warning.withOpacity(0.1);
         textColor = AppColors.warning;
-        label = 'قيد المراجعة';
+        label = 'معلقة';
         icon = Icons.hourglass_empty;
     }
 
@@ -5300,7 +5313,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       case 'rejected':
         return 'مرفوض';
       default:
-        return 'قيد المراجعة';
+        return 'معلقة';
     }
   }
 

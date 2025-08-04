@@ -253,7 +253,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
                 ),
                 SizedBox(height: AppSpacing.xs),
                 Text(
-                  'يمكنك تعديل المنجز فقط إذا كان في حالة "قيد المراجعة". بعد الاعتماد أو الرفض لا يمكن التعديل.',
+                  'يمكنك تعديل المنجز فقط إذا كان في حالة "معلقة". بعد الاعتماد أو الرفض لا يمكن التعديل.',
                   style: AppTypography.textTheme.bodySmall!.copyWith(
                     color: AppColors.warning,
                   ),
