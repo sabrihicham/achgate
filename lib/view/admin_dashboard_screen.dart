@@ -115,14 +115,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     _slideController.forward();
   }
 
-  void _onScroll() {
-    final isScrolled = _scrollController.offset > 50;
-    if (isScrolled != _isScrolled) {
-      setState(() {
-        _isScrolled = isScrolled;
-      });
-    }
-  }
+  // void _onScroll() {
+  //   final isScrolled = _scrollController.offset > 50;
+  //   if (isScrolled != _isScrolled) {
+  //     setState(() {
+  //       _isScrolled = isScrolled;
+  //     });
+  //   }
+  // }
 
   void _onSidebarItemTap(int index) {
     setState(() {

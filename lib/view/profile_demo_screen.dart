@@ -15,7 +15,7 @@ class ProfileDemoScreen extends StatefulWidget {
 class _ProfileDemoScreenState extends State<ProfileDemoScreen>
     with TickerProviderStateMixin {
   bool _isEditing = false;
-  bool _isSaving = false;
+  // bool _isSaving = false;
 
   // User profile data
   UserProfile? _userProfile;
@@ -33,8 +33,6 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
   // Animation Controllers
   late AnimationController _fadeController;
   late AnimationController _slideController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -47,14 +45,6 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
-    );
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-        );
 
     _fadeController.forward();
     _slideController.forward();
@@ -293,7 +283,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                       if (_isEditing) {
                         // Save changes to Firebase
                         setState(() {
-                          _isSaving = true;
+                          // _isSaving = true;
                         });
 
                         try {
@@ -347,7 +337,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                           );
                         } finally {
                           setState(() {
-                            _isSaving = false;
+                            // _isSaving = false;
                           });
                         }
                       }
