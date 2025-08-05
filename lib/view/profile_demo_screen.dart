@@ -180,7 +180,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                 child: Icon(
                   Icons.account_circle_outlined,
                   size: 60,
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: Colors.white.withOpacity(0.1),
                 ),
               ),
               Positioned(
@@ -189,7 +189,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                 child: Icon(
                   Icons.settings_outlined,
                   size: 40,
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: Colors.white.withOpacity(0.1),
                 ),
               ),
             ],
@@ -400,7 +400,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                   gradient: AppColors.primaryGradient,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryMedium.withValues(alpha: 0.3),
+                      color: AppColors.primaryMedium.withOpacity(0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -430,7 +430,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                     border: Border.all(color: Colors.white, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.success.withValues(alpha: 0.3),
+                        color: AppColors.success.withOpacity(0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
