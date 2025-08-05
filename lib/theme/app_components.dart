@@ -148,7 +148,7 @@ class AppComponents {
             filled: true,
             fillColor: enabled
                 ? AppColors.surfaceLight
-                : AppColors.disabled.withOpacity(0.1),
+                : AppColors.disabled.withValues(alpha: 0.1),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               borderSide: const BorderSide(color: AppColors.outline),
@@ -325,7 +325,7 @@ class AppComponents {
         child,
         if (isLoading)
           Container(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             child: loadingIndicator(message: message),
           ),
       ],
@@ -337,7 +337,7 @@ class AppComponents {
   /// Error message widget
   static Widget errorMessage({required String message, VoidCallback? onRetry}) {
     return card(
-      backgroundColor: AppColors.error.withOpacity(0.1),
+      backgroundColor: AppColors.error.withValues(alpha: 0.1),
       child: Column(
         children: [
           Icon(
@@ -363,7 +363,7 @@ class AppComponents {
   /// Success message widget
   static Widget successMessage(String message) {
     return card(
-      backgroundColor: AppColors.success.withOpacity(0.1),
+      backgroundColor: AppColors.success.withValues(alpha: 0.1),
       child: Row(
         children: [
           Icon(
@@ -448,9 +448,9 @@ class AppComponents {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.primaryDark.withOpacity(0.95),
-              AppColors.primaryMedium.withOpacity(0.90),
-              AppColors.primaryLight.withOpacity(0.85),
+              AppColors.primaryDark.withValues(alpha: 0.95),
+              AppColors.primaryMedium.withValues(alpha: 0.90),
+              AppColors.primaryLight.withValues(alpha: 0.85),
             ],
             stops: const [0.0, 0.6, 1.0],
           ),
@@ -460,13 +460,13 @@ class AppComponents {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryDark.withOpacity(0.25),
+              color: AppColors.primaryDark.withValues(alpha: 0.25),
               blurRadius: 25,
               offset: const Offset(0, 8),
               spreadRadius: 2,
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 15,
               offset: const Offset(0, 4),
             ),
@@ -484,13 +484,13 @@ class AppComponents {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.white.withOpacity(0.15),
-                  Colors.white.withOpacity(0.05),
+                  Colors.white.withValues(alpha: 0.15),
+                  Colors.white.withValues(alpha: 0.05),
                   Colors.transparent,
                 ],
               ),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
               borderRadius: const BorderRadius.only(
@@ -509,15 +509,15 @@ class AppComponents {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -525,7 +525,7 @@ class AppComponents {
                     ),
                     child: ShaderMask(
                       shaderCallback: (bounds) => LinearGradient(
-                        colors: [Colors.white, Colors.white.withOpacity(0.95)],
+                        colors: [Colors.white, Colors.white.withValues(alpha: 0.95)],
                       ).createShader(bounds),
                       child: Text(
                         title,
@@ -538,7 +538,7 @@ class AppComponents {
                             Shadow(
                               offset: const Offset(0, 3),
                               blurRadius: 6,
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withValues(alpha: 0.4),
                             ),
                           ],
                         ),
@@ -550,7 +550,7 @@ class AppComponents {
                     Text(
                       subtitle,
                       style: AppTypography.textTheme.bodyMedium!.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.8,
                       ),
@@ -570,20 +570,20 @@ class AppComponents {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.white.withOpacity(0.3),
-                                Colors.white.withOpacity(0.15),
+                                Colors.white.withValues(alpha: 0.3),
+                                Colors.white.withValues(alpha: 0.15),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.4),
+                              color: Colors.white.withValues(alpha: 0.4),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
+                                color: Colors.black.withValues(alpha: 0.15),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
@@ -614,20 +614,20 @@ class AppComponents {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.white.withOpacity(0.25),
-                                Colors.white.withOpacity(0.1),
+                                Colors.white.withValues(alpha: 0.25),
+                                Colors.white.withValues(alpha: 0.1),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -672,13 +672,13 @@ class AppComponents {
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primaryDark.withOpacity(0.4),
+              color: AppColors.primaryDark.withValues(alpha: 0.4),
               blurRadius: 20,
               offset: const Offset(0, 4),
               spreadRadius: 2,
             ),
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -688,7 +688,7 @@ class AppComponents {
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.white.withOpacity(0.1), Colors.transparent],
+                colors: [Colors.white.withValues(alpha: 0.1), Colors.transparent],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -700,15 +700,15 @@ class AppComponents {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -716,7 +716,7 @@ class AppComponents {
                 ),
                 child: ShaderMask(
                   shaderCallback: (bounds) => LinearGradient(
-                    colors: [Colors.white, Colors.white.withOpacity(0.95)],
+                    colors: [Colors.white, Colors.white.withValues(alpha: 0.95)],
                   ).createShader(bounds),
                   child: Text(
                     title,
@@ -728,7 +728,7 @@ class AppComponents {
                         Shadow(
                           offset: const Offset(0, 2),
                           blurRadius: 4,
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                         ),
                       ],
                     ),
@@ -747,20 +747,20 @@ class AppComponents {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.white.withOpacity(0.25),
-                                Colors.white.withOpacity(0.15),
+                                Colors.white.withValues(alpha: 0.25),
+                                Colors.white.withValues(alpha: 0.15),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),
@@ -798,20 +798,20 @@ class AppComponents {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      Colors.white.withOpacity(0.2),
-                                      Colors.white.withOpacity(0.1),
+                                      Colors.white.withValues(alpha: 0.2),
+                                      Colors.white.withValues(alpha: 0.1),
                                     ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.25),
+                                    color: Colors.white.withValues(alpha: 0.25),
                                     width: 1.5,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     ),
@@ -847,20 +847,20 @@ class AppComponents {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.white.withOpacity(0.2),
-              Colors.white.withOpacity(0.1),
+              Colors.white.withValues(alpha: 0.2),
+              Colors.white.withValues(alpha: 0.1),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
           border: Border(
-            bottom: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
+            bottom: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1),
           ),
         ),
         child: ClipRRect(
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.primaryDark.withOpacity(0.9),
+              color: AppColors.primaryDark.withValues(alpha: 0.9),
               backgroundBlendMode: BlendMode.overlay,
             ),
             child: AppBar(
@@ -870,10 +870,10 @@ class AppComponents {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -915,14 +915,14 @@ class AppComponents {
           color: backgroundColor ?? Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
           ],
           border: Border(
             bottom: BorderSide(
-              color: AppColors.outline.withOpacity(0.1),
+              color: AppColors.outline.withValues(alpha: 0.1),
               width: 1,
             ),
           ),

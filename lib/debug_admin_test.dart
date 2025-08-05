@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'services/admin_service.dart';
 
 class DebugAdminTest extends StatefulWidget {
-  const DebugAdminTest({Key? key}) : super(key: key);
+  const DebugAdminTest({super.key});
 
   @override
   State<DebugAdminTest> createState() => _DebugAdminTestState();

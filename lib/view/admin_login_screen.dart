@@ -2,8 +2,6 @@ import 'package:achgate/services/auth_service.dart';
 import 'package:achgate/services/admin_auth_service.dart';
 import 'package:achgate/theme/app_theme.dart';
 import 'package:achgate/core/app_router.dart';
-import 'package:achgate/view/admin_dashboard_screen.dart';
-import 'package:achgate/view/enhanced_admin_dashboard.dart';
 import 'package:flutter/material.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -166,7 +164,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             borderRadius: BorderRadius.circular(logoSize / 2),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF15508A).withOpacity(0.3),
+                color: const Color(0xFF15508A).withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -230,13 +228,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
         ],
         border: Border.all(
-          color: const Color(0xFF15508A).withOpacity(0.1),
+          color: const Color(0xFF15508A).withValues(alpha: 0.1),
           width: 2,
         ),
       ),
@@ -372,19 +370,19 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       backgroundColor: const Color(0xFF15508A),
                       foregroundColor: Colors.white,
                       elevation: 3,
-                      shadowColor: const Color(0xFF15508A).withOpacity(0.4),
+                      shadowColor: const Color(0xFF15508A).withValues(alpha: 0.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ).copyWith(
-                      overlayColor: MaterialStateProperty.resolveWith<Color?>((
-                        Set<MaterialState> states,
+                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                        Set<WidgetState> states,
                       ) {
-                        if (states.contains(MaterialState.hovered)) {
-                          return const Color(0xFF1691D0).withOpacity(0.1);
+                        if (states.contains(WidgetState.hovered)) {
+                          return const Color(0xFF1691D0).withValues(alpha: 0.1);
                         }
-                        if (states.contains(MaterialState.pressed)) {
-                          return const Color(0xFF1691D0).withOpacity(0.2);
+                        if (states.contains(WidgetState.pressed)) {
+                          return const Color(0xFF1691D0).withValues(alpha: 0.2);
                         }
                         return null;
                       }),
@@ -533,7 +531,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: const Color(0xFF15508A).withOpacity(0.3),
+                color: const Color(0xFF15508A).withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -748,7 +746,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
   // Desktop Layout (> 1024px)
   Widget _buildDesktopLayout(BoxConstraints constraints) {
-    return Container(
+    return SizedBox(
       height: constraints.maxHeight,
       child: Row(
         children: [
@@ -777,7 +775,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(50),
                       ),
                     ),
@@ -789,7 +787,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                       width: 150,
                       height: 150,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(75),
                       ),
                     ),
@@ -806,10 +804,10 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           Container(
                             padding: const EdgeInsets.all(30),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                                 width: 3,
                               ),
                             ),
@@ -825,7 +823,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                             'نظام إدارة متقدم للمشرفين والإداريين',
                             style: AppTheme.lightTheme.textTheme.headlineMedium
                                 ?.copyWith(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontWeight: FontWeight.bold,
                                 ),
                             textAlign: TextAlign.center,
@@ -933,7 +931,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
 
                     // Admin login form container
                     Center(
-                      child: Container(width: 500, child: _buildLoginForm()),
+                      child: SizedBox(width: 500, child: _buildLoginForm()),
                     ),
 
                     const SizedBox(height: 40),
@@ -1009,7 +1007,7 @@ class WavePatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF15508A).withOpacity(0.1)
+      ..color = const Color(0xFF15508A).withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
     final path = Path();

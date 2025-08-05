@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(logoSize / 2),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF15508A).withOpacity(0.2),
+                color: const Color(0xFF15508A).withValues(alpha: 0.2),
                 blurRadius: isDesktop ? 20 : 15,
                 offset: const Offset(0, 8),
               ),
@@ -182,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 10),
           ),
@@ -355,19 +355,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       backgroundColor: const Color(0xFF15508A),
                       foregroundColor: Colors.white,
                       elevation: 2,
-                      shadowColor: const Color(0xFF15508A).withOpacity(0.3),
+                      shadowColor: const Color(0xFF15508A).withValues(alpha: 0.3),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ).copyWith(
-                      overlayColor: MaterialStateProperty.resolveWith<Color?>((
-                        Set<MaterialState> states,
+                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                        Set<WidgetState> states,
                       ) {
-                        if (states.contains(MaterialState.hovered)) {
-                          return const Color(0xFF1691D0).withOpacity(0.1);
+                        if (states.contains(WidgetState.hovered)) {
+                          return const Color(0xFF1691D0).withValues(alpha: 0.1);
                         }
-                        if (states.contains(MaterialState.pressed)) {
-                          return const Color(0xFF1691D0).withOpacity(0.2);
+                        if (states.contains(WidgetState.pressed)) {
+                          return const Color(0xFF1691D0).withValues(alpha: 0.2);
                         }
                         return null;
                       }),
@@ -691,7 +691,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Desktop Layout (> 1024px)
   Widget _buildDesktopLayout(BoxConstraints constraints) {
-    return Container(
+    return SizedBox(
       height: constraints.maxHeight,
       child: Row(
         children: [
@@ -720,7 +720,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(50),
                       ),
                     ),
@@ -732,7 +732,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: 150,
                       height: 150,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(75),
                       ),
                     ),
@@ -759,7 +759,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             'نظام إدارة متقدم لادارة المنجزات الخاصة بتجمع جدة الصحي الثاني',
                             style: AppTheme.lightTheme.textTheme.headlineMedium
                                 ?.copyWith(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontWeight: FontWeight.bold,
                                 ),
                             textAlign: TextAlign.center,
@@ -770,7 +770,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           //   'مرحباً بكم في',
                           //   style: TextStyle(
                           //     fontSize: 24,
-                          //     color: Colors.white.withOpacity(0.9),
+                          //     color: Colors.white.withValues(alpha: 0.9),
                           //     fontWeight: FontWeight.w300,
                           //   ),
                           //   textAlign: TextAlign.center,
@@ -898,7 +898,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // Login form container
                     Center(
-                      child: Container(width: 500, child: _buildLoginForm()),
+                      child: SizedBox(width: 500, child: _buildLoginForm()),
                     ),
 
                     const SizedBox(height: 40),
@@ -973,7 +973,7 @@ class WavePatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF2CAAE2).withOpacity(0.1)
+      ..color = const Color(0xFF2CAAE2).withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
     final path = Path();
@@ -1003,7 +1003,7 @@ class WavePatternPainter extends CustomPainter {
     // Add additional decorative elements for desktop
     if (size.width > 1024) {
       final decorativePaint = Paint()
-        ..color = const Color(0xFF2CAAE2).withOpacity(0.05)
+        ..color = const Color(0xFF2CAAE2).withValues(alpha: 0.05)
         ..style = PaintingStyle.fill;
 
       // Add some circles

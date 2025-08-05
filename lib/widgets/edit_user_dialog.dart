@@ -112,14 +112,14 @@ class _EditUserDialogState extends State<EditUserDialog> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.1),
+                  color: AppColors.primaryLight.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor: AppColors.primaryLight.withOpacity(0.3),
+                      backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
                       child: Text(
                         widget.user.name.isNotEmpty
                             ? widget.user.name[0].toUpperCase()
@@ -307,10 +307,10 @@ class _EditUserDialogState extends State<EditUserDialog> {
                                     });
                                   },
                                   backgroundColor: isSelected
-                                      ? AppColors.primaryLight.withOpacity(0.2)
+                                      ? AppColors.primaryLight.withValues(alpha: 0.2)
                                       : null,
                                   selectedColor: AppColors.primaryLight
-                                      .withOpacity(0.4),
+                                      .withValues(alpha: 0.4),
                                 );
                               }).toList(),
                             ),

@@ -90,29 +90,29 @@ class AppColors {
 
   // ============ OPACITY VARIANTS ============
   /// Light overlay for decorative elements
-  static Color get primaryLightOverlay => primaryLight.withOpacity(0.1);
+  static Color get primaryLightOverlay => primaryLight.withValues(alpha: 0.1);
 
   /// Medium overlay for hover states
-  static Color get primaryMediumOverlay => primaryMedium.withOpacity(0.1);
+  static Color get primaryMediumOverlay => primaryMedium.withValues(alpha: 0.1);
 
   /// Dark overlay for pressed states
-  static Color get primaryDarkOverlay => primaryDark.withOpacity(0.1);
+  static Color get primaryDarkOverlay => primaryDark.withValues(alpha: 0.1);
 
   /// Shadow color for elevated elements
-  static Color get shadowColor => Colors.black.withOpacity(0.08);
+  static Color get shadowColor => Colors.black.withValues(alpha: 0.08);
 
   // ============ SEMANTIC COLOR METHODS ============
   /// Get success color with opacity
-  static Color successWithOpacity(double opacity) => success.withOpacity(opacity);
+  static Color successWithOpacity(double opacity) => success.withValues(alpha: opacity);
 
   /// Get error color with opacity
-  static Color errorWithOpacity(double opacity) => error.withOpacity(opacity);
+  static Color errorWithOpacity(double opacity) => error.withValues(alpha: opacity);
 
   /// Get warning color with opacity
-  static Color warningWithOpacity(double opacity) => warning.withOpacity(opacity);
+  static Color warningWithOpacity(double opacity) => warning.withValues(alpha: opacity);
 
   /// Get info color with opacity
-  static Color infoWithOpacity(double opacity) => info.withOpacity(opacity);
+  static Color infoWithOpacity(double opacity) => info.withValues(alpha: opacity);
 
   // ============ ACCESSIBILITY HELPERS ============
   /// Check if a color provides sufficient contrast for accessibility

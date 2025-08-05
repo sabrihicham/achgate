@@ -179,13 +179,13 @@ class _AdminNotificationWidgetState extends State<AdminNotificationWidget>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ],
                 border: Border.all(
-                  color: widget.color.withOpacity(0.3),
+                  color: widget.color.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -194,7 +194,7 @@ class _AdminNotificationWidgetState extends State<AdminNotificationWidget>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: widget.color.withOpacity(0.1),
+                      color: widget.color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(widget.icon, color: widget.color, size: 24),
@@ -216,7 +216,7 @@ class _AdminNotificationWidgetState extends State<AdminNotificationWidget>
                           Text(
                             widget.message!,
                             style: AppTypography.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.onSurface.withOpacity(0.8),
+                              color: AppColors.onSurface.withValues(alpha: 0.8),
                             ),
                           ),
                         ],
@@ -228,7 +228,7 @@ class _AdminNotificationWidgetState extends State<AdminNotificationWidget>
                     icon: Icon(
                       Icons.close,
                       size: 20,
-                      color: AppColors.onSurface.withOpacity(0.5),
+                      color: AppColors.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ],
@@ -273,7 +273,7 @@ class AdminConfirmationDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 48, color: iconColor),
@@ -291,7 +291,7 @@ class AdminConfirmationDialog extends StatelessWidget {
             Text(
               content,
               style: AppTypography.textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurface.withOpacity(0.8),
+                color: AppColors.onSurface.withValues(alpha: 0.8),
               ),
               textAlign: TextAlign.center,
             ),

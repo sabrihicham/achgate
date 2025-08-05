@@ -209,7 +209,7 @@
 //         color: Colors.white,
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.08),
+//             color: Colors.black.withValues(alpha: 0.08),
 //             blurRadius: 20,
 //             offset: const Offset(4, 0),
 //           ),
@@ -244,10 +244,10 @@
 //           Container(
 //             padding: const EdgeInsets.all(20),
 //             decoration: BoxDecoration(
-//               color: Colors.white.withOpacity(0.2),
+//               color: Colors.white.withValues(alpha: 0.2),
 //               shape: BoxShape.circle,
 //               border: Border.all(
-//                 color: Colors.white.withOpacity(0.3),
+//                 color: Colors.white.withValues(alpha: 0.3),
 //                 width: 2,
 //               ),
 //             ),
@@ -269,7 +269,7 @@
 //           Text(
 //             'نظام إدارة المنجزات المتطور',
 //             style: AppTypography.textTheme.bodyMedium?.copyWith(
-//               color: Colors.white.withOpacity(0.9),
+//               color: Colors.white.withValues(alpha: 0.9),
 //             ),
 //           ),
 //         ],
@@ -295,7 +295,7 @@
 //           ),
 //           child: Material(
 //             color: isSelected
-//                 ? AppColors.primaryLight.withOpacity(0.1)
+//                 ? AppColors.primaryLight.withValues(alpha: 0.1)
 //                 : Colors.transparent,
 //             borderRadius: BorderRadius.circular(12),
 //             child: InkWell(
@@ -316,7 +316,7 @@
 //                       isSelected ? item['selectedIcon'] : item['icon'],
 //                       color: isSelected
 //                           ? AppColors.primaryDark
-//                           : AppColors.onSurface.withOpacity(0.7),
+//                           : AppColors.onSurface.withValues(alpha: 0.7),
 //                       size: 24,
 //                     ),
 //                     const SizedBox(width: AppSpacing.md),
@@ -378,7 +378,7 @@
 //           const Divider(),
 //           const SizedBox(height: AppSpacing.sm),
 //           Material(
-//             color: Colors.red.withOpacity(0.1),
+//             color: Colors.red.withValues(alpha: 0.1),
 //             borderRadius: BorderRadius.circular(12),
 //             child: InkWell(
 //               onTap: _handleLogout,
@@ -522,7 +522,7 @@
 //         borderRadius: BorderRadius.circular(16),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 15,
 //             offset: const Offset(0, 8),
 //           ),
@@ -595,14 +595,14 @@
 //       decoration: BoxDecoration(
 //         color: AppColors.surfaceLight,
 //         borderRadius: BorderRadius.circular(12),
-//         border: Border.all(color: AppColors.outline.withOpacity(0.2)),
+//         border: Border.all(color: AppColors.outline.withValues(alpha: 0.2)),
 //       ),
 //       child: Row(
 //         children: [
 //           Container(
 //             padding: const EdgeInsets.all(8),
 //             decoration: BoxDecoration(
-//               color: Colors.orange.withOpacity(0.1),
+//               color: Colors.orange.withValues(alpha: 0.1),
 //               borderRadius: BorderRadius.circular(8),
 //             ),
 //             child: const Icon(
@@ -628,7 +628,7 @@
 //                 Text(
 //                   achievement.executiveDepartment,
 //                   style: AppTypography.textTheme.bodyMedium?.copyWith(
-//                     color: AppColors.onSurface.withOpacity(0.7),
+//                     color: AppColors.onSurface.withValues(alpha: 0.7),
 //                   ),
 //                 ),
 //               ],
@@ -714,7 +714,7 @@
 //         borderRadius: BorderRadius.circular(16),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 15,
 //             offset: const Offset(0, 8),
 //           ),
@@ -726,7 +726,7 @@
 //           Container(
 //             padding: const EdgeInsets.all(AppSpacing.lg),
 //             decoration: BoxDecoration(
-//               color: AppColors.primaryLight.withOpacity(0.1),
+//               color: AppColors.primaryLight.withValues(alpha: 0.1),
 //               borderRadius: const BorderRadius.vertical(
 //                 top: Radius.circular(16),
 //               ),
@@ -747,7 +747,7 @@
 //                       Text(
 //                         achievement.goal,
 //                         style: AppTypography.textTheme.bodyLarge?.copyWith(
-//                           color: AppColors.onSurface.withOpacity(0.8),
+//                           color: AppColors.onSurface.withValues(alpha: 0.8),
 //                         ),
 //                       ),
 //                     ],
@@ -831,7 +831,7 @@
 //               '$label:',
 //               style: AppTypography.textTheme.bodyMedium?.copyWith(
 //                 fontWeight: FontWeight.bold,
-//                 color: AppColors.onSurface.withOpacity(0.7),
+//                 color: AppColors.onSurface.withValues(alpha: 0.7),
 //               ),
 //             ),
 //           ),
@@ -1051,15 +1051,15 @@
 //         borderRadius: BorderRadius.circular(16),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 10,
 //             offset: const Offset(0, 4),
 //           ),
 //         ],
 //         border: Border.all(
 //           color: isActive
-//               ? Colors.green.withOpacity(0.3)
-//               : Colors.red.withOpacity(0.3),
+//               ? Colors.green.withValues(alpha: 0.3)
+//               : Colors.red.withValues(alpha: 0.3),
 //           width: 1,
 //         ),
 //       ),
@@ -1069,7 +1069,7 @@
 //           children: [
 //             CircleAvatar(
 //               radius: 30,
-//               backgroundColor: AppColors.primaryLight.withOpacity(0.2),
+//               backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
 //               child: Text(
 //                 (user['displayName']?.toString().substring(0, 1) ?? 'م')
 //                     .toUpperCase(),
@@ -1106,8 +1106,8 @@
 //                     ),
 //                     decoration: BoxDecoration(
 //                       color: isActive
-//                           ? Colors.green.withOpacity(0.1)
-//                           : Colors.red.withOpacity(0.1),
+//                           ? Colors.green.withValues(alpha: 0.1)
+//                           : Colors.red.withValues(alpha: 0.1),
 //                       borderRadius: BorderRadius.circular(8),
 //                     ),
 //                     child: Text(

@@ -21,7 +21,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
   final _jobTitleController = TextEditingController();
 
   String _selectedDepartment = '';
-  List<String> _selectedRoles = ['user'];
+  final List<String> _selectedRoles = ['user'];
   bool _isLoading = false;
 
   final List<String> _departments = [
@@ -269,10 +269,10 @@ class _AddUserDialogState extends State<AddUserDialog> {
                                     });
                                   },
                                   backgroundColor: isSelected
-                                      ? AppColors.primaryLight.withOpacity(0.2)
+                                      ? AppColors.primaryLight.withValues(alpha: 0.2)
                                       : null,
                                   selectedColor: AppColors.primaryLight
-                                      .withOpacity(0.4),
+                                      .withValues(alpha: 0.4),
                                 );
                               }).toList(),
                             ),

@@ -101,7 +101,7 @@ class _EnhancedEditUserDialogState extends State<EnhancedEditUserDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withOpacity(0.1),
+                    color: AppColors.primaryLight.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -244,7 +244,7 @@ class _EnhancedEditUserDialogState extends State<EnhancedEditUserDialog> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primaryLight.withOpacity(0.1),
+            color: AppColors.primaryLight.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: AppColors.primaryDark, size: 20),
@@ -450,9 +450,9 @@ class _EnhancedEditUserDialogState extends State<EnhancedEditUserDialog> {
                   });
                 },
                 backgroundColor: isSelected
-                    ? AppColors.primaryLight.withOpacity(0.2)
+                    ? AppColors.primaryLight.withValues(alpha: 0.2)
                     : null,
-                selectedColor: AppColors.primaryLight.withOpacity(0.4),
+                selectedColor: AppColors.primaryLight.withValues(alpha: 0.4),
               );
             }).toList(),
           ),

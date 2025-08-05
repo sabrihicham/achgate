@@ -63,7 +63,7 @@ class _AdminAccessButtonState extends State<AdminAccessButton> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryDark.withOpacity(0.3),
+                  color: AppColors.primaryDark.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -121,14 +121,14 @@ class AdminQuickAccess extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.primaryDark.withOpacity(0.1),
-                      AppColors.primaryMedium.withOpacity(0.1),
-                      AppColors.primaryLight.withOpacity(0.1),
+                      AppColors.primaryDark.withValues(alpha: 0.1),
+                      AppColors.primaryMedium.withValues(alpha: 0.1),
+                      AppColors.primaryLight.withValues(alpha: 0.1),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppColors.primaryMedium.withOpacity(0.3),
+                    color: AppColors.primaryMedium.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -137,7 +137,7 @@ class AdminQuickAccess extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryMedium.withOpacity(0.2),
+                        color: AppColors.primaryMedium.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -163,7 +163,7 @@ class AdminQuickAccess extends StatelessWidget {
                           Text(
                             'إدارة المنجزات والمستخدمين',
                             style: AppTypography.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.onSurface.withOpacity(0.7),
+                              color: AppColors.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],

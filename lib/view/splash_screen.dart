@@ -19,8 +19,6 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _slideController;
 
   late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -47,14 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
-    );
 
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
-        );
 
     // Start animations
     _startAnimations();
@@ -232,7 +223,7 @@ class _SplashScreenState extends State<SplashScreen>
                             'جاري التحميل...',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                               fontWeight: FontWeight.w400,
                             ),
                           ),

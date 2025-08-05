@@ -1,8 +1,9 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/user_management_service.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_typography.dart';
 import 'enhanced_add_user_dialog.dart';
 import 'enhanced_edit_user_dialog.dart';
 
@@ -170,7 +171,7 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -184,7 +185,7 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -219,7 +220,7 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -362,7 +363,7 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -374,7 +375,7 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryDark.withOpacity(0.1),
+              color: AppColors.primaryDark.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -491,7 +492,7 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: AppColors.primaryLight.withOpacity(0.2),
+                  backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
                   child: Text(
                     user.name.isNotEmpty ? user.name[0].toUpperCase() : 'م',
                     style: TextStyle(
@@ -577,9 +578,9 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: roleColor.withOpacity(0.1),
+                    color: roleColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: roleColor.withOpacity(0.3)),
+                    border: Border.all(color: roleColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     roleText,
@@ -601,8 +602,8 @@ class _UsersManagementWidgetState extends State<UsersManagementWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: user.isActive
-                    ? Colors.green.withOpacity(0.1)
-                    : Colors.red.withOpacity(0.1),
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

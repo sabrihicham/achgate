@@ -68,9 +68,9 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
           ),
           child: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -83,10 +83,10 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -195,12 +195,12 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppColors.primaryLight.withOpacity(0.1),
-                AppColors.primaryMedium.withOpacity(0.1),
+                AppColors.primaryLight.withValues(alpha: 0.1),
+                AppColors.primaryMedium.withValues(alpha: 0.1),
               ],
             ),
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: AppColors.primaryLight.withOpacity(0.3)),
+            border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -260,7 +260,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
                 Icon(
                   Icons.error_outline,
                   size: 64,
-                  color: AppColors.error.withOpacity(0.5),
+                  color: AppColors.error.withValues(alpha: 0.5),
                 ),
                 SizedBox(height: AppSpacing.md),
                 Text(
@@ -332,7 +332,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
           Icon(
             icon,
             size: 80,
-            color: AppColors.onSurfaceVariant.withOpacity(0.5),
+            color: AppColors.onSurfaceVariant.withValues(alpha: 0.5),
           ),
           SizedBox(height: AppSpacing.lg),
           Text(
@@ -387,7 +387,7 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -493,19 +493,19 @@ class _ViewAchievementsScreenState extends State<ViewAchievementsScreen>
 
     switch (status) {
       case 'approved':
-        backgroundColor = AppColors.success.withOpacity(0.1);
+        backgroundColor = AppColors.success.withValues(alpha: 0.1);
         textColor = AppColors.success;
         label = 'معتمد';
         icon = Icons.check_circle;
         break;
       case 'rejected':
-        backgroundColor = AppColors.error.withOpacity(0.1);
+        backgroundColor = AppColors.error.withValues(alpha: 0.1);
         textColor = AppColors.error;
         label = 'مرفوض';
         icon = Icons.cancel;
         break;
       default:
-        backgroundColor = AppColors.warning.withOpacity(0.1);
+        backgroundColor = AppColors.warning.withValues(alpha: 0.1);
         textColor = AppColors.warning;
         label = 'معلقة';
         icon = Icons.hourglass_empty;

@@ -738,7 +738,7 @@ class AdminService {
         .collection(_usersCollection)
         .orderBy('email')
         .startAt([query.toLowerCase()])
-        .endAt([query.toLowerCase() + '\uf8ff'])
+        .endAt(['${query.toLowerCase()}\uf8ff'])
         .snapshots()
         .map(
           (snapshot) => snapshot.docs

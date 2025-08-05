@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../theme/app_components.dart';
@@ -36,8 +35,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   bool _isScrolled = false;
   bool _isLoading = true;
   bool _isAdmin = false;
-  List<Achievement> _achievements = [];
-  List<Achievement> _pendingAchievements = [];
+  final List<Achievement> _achievements = [];
+  final List<Achievement> _pendingAchievements = [];
 
   // Success and warning colors for the theme
   static const Color successColor = Color(0xFF4CAF50);
@@ -327,12 +326,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 colors: [
                   AppColors.primaryDark,
                   AppColors.primaryMedium,
-                  AppColors.primaryLight.withOpacity(0.8),
+                  AppColors.primaryLight.withValues(alpha: 0.8),
                 ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryDark.withOpacity(0.1),
+                  color: AppColors.primaryDark.withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(2, 0),
                 ),
@@ -364,10 +363,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -390,7 +389,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Text(
             'تجمع جدة الصحي الثاني',
             style: AppTypography.textTheme.bodySmall?.copyWith(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
             ),
             textAlign: TextAlign.center,
           ),
@@ -438,12 +437,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.white.withOpacity(0.15)
+                            ? Colors.white.withValues(alpha: 0.15)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(16),
                         border: isSelected
                             ? Border.all(
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white.withValues(alpha: 0.3),
                                 width: 1,
                               )
                             : null,
@@ -490,8 +489,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         gradient: _isScrolled
             ? LinearGradient(
                 colors: [
-                  Colors.white.withOpacity(0.98),
-                  Colors.white.withOpacity(0.95),
+                  Colors.white.withValues(alpha: 0.98),
+                  Colors.white.withValues(alpha: 0.95),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -500,45 +499,45 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.primaryDark.withOpacity(0.95),
-                  AppColors.primaryMedium.withOpacity(0.90),
-                  AppColors.primaryLight.withOpacity(0.85),
+                  AppColors.primaryDark.withValues(alpha: 0.95),
+                  AppColors.primaryMedium.withValues(alpha: 0.90),
+                  AppColors.primaryLight.withValues(alpha: 0.85),
                 ],
                 stops: const [0.0, 0.6, 1.0],
               ),
         boxShadow: _isScrolled
             ? [
                 BoxShadow(
-                  color: AppColors.primaryDark.withOpacity(0.15),
+                  color: AppColors.primaryDark.withValues(alpha: 0.15),
                   blurRadius: 25,
                   offset: const Offset(0, 8),
                   spreadRadius: 2,
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 15,
                   offset: const Offset(0, 4),
                 ),
               ]
             : [
                 BoxShadow(
-                  color: AppColors.primaryDark.withOpacity(0.3),
+                  color: AppColors.primaryDark.withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 10),
                   spreadRadius: 3,
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 20,
                   offset: const Offset(0, 5),
                 ),
               ],
         border: _isScrolled
             ? Border.all(
-                color: AppColors.primaryLight.withOpacity(0.3),
+                color: AppColors.primaryLight.withValues(alpha: 0.3),
                 width: 1.5,
               )
-            : Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+            : Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
@@ -568,8 +567,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       _getPageSubtitle(),
                       style: AppTypography.textTheme.bodyLarge?.copyWith(
                         color: _isScrolled
-                            ? AppColors.primaryDark.withOpacity(0.7)
-                            : Colors.white.withOpacity(0.9),
+                            ? AppColors.primaryDark.withValues(alpha: 0.7)
+                            : Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -626,11 +625,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         fontWeight: FontWeight.w600,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primaryDark.withOpacity(0.95),
+        color: AppColors.primaryDark.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -644,23 +643,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               onTap: onPressed,
               borderRadius: BorderRadius.circular(18),
               splashColor: _isScrolled
-                  ? AppColors.primaryLight.withOpacity(0.3)
-                  : Colors.white.withOpacity(0.3),
+                  ? AppColors.primaryLight.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.3),
               hoverColor: _isScrolled
-                  ? AppColors.primaryLight.withOpacity(0.1)
-                  : Colors.white.withOpacity(0.1),
+                  ? AppColors.primaryLight.withValues(alpha: 0.1)
+                  : Colors.white.withValues(alpha: 0.1),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
                   color: _isScrolled
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.white.withOpacity(0.15),
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.white.withValues(alpha: 0.15),
                   border: Border.all(
                     color: _isScrolled
-                        ? AppColors.primaryLight.withOpacity(0.3)
-                        : Colors.white.withOpacity(0.3),
+                        ? AppColors.primaryLight.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
@@ -755,7 +754,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryLight.withOpacity(0.1),
+              color: AppColors.primaryLight.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -796,7 +795,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryLight.withOpacity(0.1),
+              color: AppColors.primaryLight.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
@@ -870,7 +869,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.primaryLight.withOpacity(0.1), Colors.white],
+          colors: [AppColors.primaryLight.withValues(alpha: 0.1), Colors.white],
         ),
       ),
       child: CustomScrollView(
@@ -955,7 +954,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryDark.withOpacity(0.3),
+            color: AppColors.primaryDark.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -978,7 +977,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Text(
                   'تتبع الإنجازات وإدارة النظام بسهولة',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -1045,7 +1044,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1059,7 +1058,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -1146,7 +1145,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -1161,7 +1160,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.7)],
+                    colors: [color, color.withValues(alpha: 0.7)],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1171,7 +1170,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(Icons.arrow_upward, color: color, size: 16),
@@ -1215,7 +1214,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -1322,10 +1321,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -1337,7 +1336,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 24),
@@ -1411,14 +1410,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [warningColor, warningColor.withOpacity(0.8)],
+          colors: [warningColor, warningColor.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: warningColor.withOpacity(0.3),
+            color: warningColor.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -1441,7 +1440,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Text(
                   'مراجعة سريعة للمنجزات المعلقة ($pendingCount منجز)',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -1450,7 +1449,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -1648,7 +1647,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1790,12 +1789,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryDark
-              : AppColors.primaryLight.withOpacity(0.1),
+              : AppColors.primaryLight.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? AppColors.primaryDark
-                : AppColors.primaryLight.withOpacity(0.3),
+                : AppColors.primaryLight.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -1818,7 +1817,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1829,7 +1828,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: successColor.withOpacity(0.1),
+              color: successColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -1980,10 +1979,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: priorityColor.withOpacity(0.3)),
+          border: Border.all(color: priorityColor.withValues(alpha: 0.3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -2000,7 +1999,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: priorityColor.withOpacity(0.1),
+                    color: priorityColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -2098,10 +2097,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: priorityColor.withOpacity(0.3)),
+        border: Border.all(color: priorityColor.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -2115,7 +2114,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: priorityColor.withOpacity(0.1),
+                  color: priorityColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -2142,7 +2141,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       ),
                     ),
                     Text(
-                      '${daysDiff == 0 ? 'اليوم' : '$daysDiff ${daysDiff == 1 ? 'يوم' : 'أيام'} مضت'}',
+                      daysDiff == 0 ? 'اليوم' : '$daysDiff ${daysDiff == 1 ? 'يوم' : 'أيام'} مضت',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.onSurfaceVariant,
                       ),
@@ -2180,7 +2179,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primaryLight.withOpacity(0.1),
+              color: AppColors.primaryLight.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -2232,7 +2231,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   icon: const Icon(Icons.info_outline),
                   tooltip: 'عرض التفاصيل',
                   style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primaryLight.withOpacity(0.1),
+                    backgroundColor: AppColors.primaryLight.withValues(alpha: 0.1),
                     foregroundColor: AppColors.primaryDark,
                   ),
                 ),
@@ -2414,7 +2413,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryDark.withOpacity(0.3),
+            color: AppColors.primaryDark.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -2437,7 +2436,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Text(
                   'إدارة شاملة لجميع المنجزات في النظام ($totalCount منجز)',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -2446,7 +2445,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -2524,7 +2523,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -2609,7 +2608,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: AppColors.primaryLight.withOpacity(0.3),
+                        color: AppColors.primaryLight.withValues(alpha: 0.3),
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
@@ -2770,12 +2769,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryDark
-              : AppColors.primaryLight.withOpacity(0.1),
+              : AppColors.primaryLight.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? AppColors.primaryDark
-                : AppColors.primaryLight.withOpacity(0.3),
+                : AppColors.primaryLight.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -2848,9 +2847,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight.withOpacity(0.1),
+        color: AppColors.primaryLight.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primaryLight.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2865,7 +2864,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             child: Icon(
               Icons.close,
               size: 16,
-              color: AppColors.primaryDark.withOpacity(0.7),
+              color: AppColors.primaryDark.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -3070,7 +3069,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 child: _buildProgressCard(
                   'معدل الموافقة',
                   total > 0
-                      ? (approved / total * 100).toStringAsFixed(1) + '%'
+                      ? '${(approved / total * 100).toStringAsFixed(1)}%'
                       : '0%',
                   total > 0 ? approved / total : 0.0,
                   successColor,
@@ -3081,7 +3080,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 child: _buildProgressCard(
                   'معدل الرفض',
                   total > 0
-                      ? (rejected / total * 100).toStringAsFixed(1) + '%'
+                      ? '${(rejected / total * 100).toStringAsFixed(1)}%'
                       : '0%',
                   total > 0 ? rejected / total : 0.0,
                   errorColor,
@@ -3092,7 +3091,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 child: _buildProgressCard(
                   'معلقة',
                   total > 0
-                      ? (pending / total * 100).toStringAsFixed(1) + '%'
+                      ? '${(pending / total * 100).toStringAsFixed(1)}%'
                       : '0%',
                   total > 0 ? pending / total : 0.0,
                   warningColor,
@@ -3118,10 +3117,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -3154,7 +3153,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           const SizedBox(height: 12),
           LinearProgressIndicator(
             value: progress,
-            backgroundColor: color.withOpacity(0.1),
+            backgroundColor: color.withValues(alpha: 0.1),
             valueColor: AlwaysStoppedAnimation<Color>(color),
             borderRadius: BorderRadius.circular(4),
           ),
@@ -3178,10 +3177,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryLight.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -3236,7 +3235,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withOpacity(0.1),
+                            color: AppColors.primaryLight.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -3276,10 +3275,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -3290,7 +3289,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -3330,7 +3329,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -3345,7 +3344,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.primaryLight.withOpacity(0.1),
+              color: AppColors.primaryLight.withValues(alpha: 0.1),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(
                   _selectedAchievements.isNotEmpty ? 0 : 16,
@@ -3456,7 +3455,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primaryDark.withOpacity(0.1),
+        color: AppColors.primaryDark.withValues(alpha: 0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
@@ -3553,8 +3552,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isSelected
-            ? AppColors.primaryLight.withOpacity(0.1)
-            : (isEven ? Colors.grey.withOpacity(0.02) : Colors.white),
+            ? AppColors.primaryLight.withValues(alpha: 0.1)
+            : (isEven ? Colors.grey.withValues(alpha: 0.02) : Colors.white),
       ),
       child: Row(
         children: [
@@ -3764,9 +3763,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: errorColor.withOpacity(0.1),
+                color: errorColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: errorColor.withOpacity(0.3)),
+                border: Border.all(color: errorColor.withValues(alpha: 0.3)),
               ),
               child: const Row(
                 children: [
@@ -3904,9 +3903,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -3942,7 +3941,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 16, color: color),
@@ -3960,7 +3959,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -3971,7 +3970,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Icon(
             Icons.search_off,
             size: 64,
-            color: AppColors.onSurfaceVariant.withOpacity(0.5),
+            color: AppColors.onSurfaceVariant.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -3984,7 +3983,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Text(
             'جرب تغيير معايير البحث أو الفلترة',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.onSurfaceVariant.withOpacity(0.7),
+              color: AppColors.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -4000,7 +3999,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -4011,7 +4010,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Icon(
             Icons.error_outline,
             size: 64,
-            color: errorColor.withOpacity(0.7),
+            color: errorColor.withValues(alpha: 0.7),
           ),
           const SizedBox(height: 16),
           Text(
@@ -4183,9 +4182,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: errorColor.withOpacity(0.1),
+                color: errorColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: errorColor.withOpacity(0.3)),
+                border: Border.all(color: errorColor.withValues(alpha: 0.3)),
               ),
               child: const Row(
                 children: [
@@ -4453,7 +4452,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: Colors.white.withValues(alpha: 0.2),
                 child: const Icon(Icons.person, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 12),

@@ -180,7 +180,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                 child: Icon(
                   Icons.account_circle_outlined,
                   size: 60,
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                 ),
               ),
               Positioned(
@@ -189,7 +189,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                 child: Icon(
                   Icons.settings_outlined,
                   size: 40,
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                 ),
               ),
             ],
@@ -260,7 +260,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -275,8 +275,8 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
               Container(
                 decoration: BoxDecoration(
                   color: _isEditing
-                      ? AppColors.success.withOpacity(0.1)
-                      : AppColors.primaryLight.withOpacity(0.1),
+                      ? AppColors.success.withValues(alpha: 0.1)
+                      : AppColors.primaryLight.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _isEditing
@@ -400,7 +400,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                   gradient: AppColors.primaryGradient,
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryMedium.withOpacity(0.3),
+                      color: AppColors.primaryMedium.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -430,7 +430,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                     border: Border.all(color: Colors.white, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.success.withOpacity(0.3),
+                        color: AppColors.success.withValues(alpha: 0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -490,12 +490,12 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.success.withOpacity(0.1),
-                  AppColors.success.withOpacity(0.05),
+                  AppColors.success.withValues(alpha: 0.1),
+                  AppColors.success.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: BorderRadius.circular(25),
-              border: Border.all(color: AppColors.success.withOpacity(0.3)),
+              border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -527,13 +527,13 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryLight.withOpacity(0.1),
-                      AppColors.primaryMedium.withOpacity(0.05),
+                      AppColors.primaryLight.withValues(alpha: 0.1),
+                      AppColors.primaryMedium.withValues(alpha: 0.05),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppColors.primaryLight.withOpacity(0.3),
+                    color: AppColors.primaryLight.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
@@ -590,7 +590,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -633,7 +633,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -677,7 +677,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -723,7 +723,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -769,10 +769,10 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.error.withOpacity(0.2), width: 1),
+        border: Border.all(color: AppColors.error.withValues(alpha: 0.2), width: 1),
         boxShadow: [
           BoxShadow(
-            color: AppColors.error.withOpacity(0.05),
+            color: AppColors.error.withValues(alpha: 0.05),
             blurRadius: 30,
             offset: const Offset(0, 8),
           ),
@@ -823,7 +823,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 24),
@@ -967,7 +967,7 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
         label: Text(title),
         style: OutlinedButton.styleFrom(
           foregroundColor: color,
-          side: BorderSide(color: color.withOpacity(0.5)),
+          side: BorderSide(color: color.withValues(alpha: 0.5)),
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
@@ -1210,9 +1210,9 @@ class _ProfileDemoScreenState extends State<ProfileDemoScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.error.withOpacity(0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.error.withOpacity(0.3)),
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
               ),
               child: Text(
                 'هذا الإجراء لا يمكن التراجع عنه!',

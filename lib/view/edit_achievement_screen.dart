@@ -102,8 +102,9 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
 
   // Get sub departments list for selected main department
   List<String> get _availableSubDepartments {
-    if (_selectedExecutiveDepartment == null || _selectedMainDepartment == null)
+    if (_selectedExecutiveDepartment == null || _selectedMainDepartment == null) {
       return [];
+    }
     return _departmentsService.getSubDepartments(
       _selectedExecutiveDepartment!,
       _selectedMainDepartment!,
@@ -193,9 +194,9 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
           ),
           child: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -232,9 +233,9 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
     return Container(
       padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.1),
+        color: AppColors.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+        border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -273,7 +274,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -721,7 +722,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
                               vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryLight.withOpacity(0.1),
+                              color: AppColors.primaryLight.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusSm,
                               ),
@@ -756,7 +757,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
                             ),
                           ),
                         )
-                        .toList(),
+                        ,
                   ],
                 ],
               ),
@@ -846,7 +847,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primaryDark.withOpacity(0.3),
+            color: AppColors.primaryDark.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -998,7 +999,7 @@ class _EditAchievementScreenState extends State<EditAchievementScreen>
             Container(
               padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               ),
               child: const Icon(

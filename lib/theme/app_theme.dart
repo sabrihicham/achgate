@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/src/material/card_theme.dart';
-import 'package:flutter/src/material/dialog_theme.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 import 'app_spacing.dart';
@@ -19,15 +17,13 @@ class AppTheme {
         secondary: AppColors.primaryMedium,
         tertiary: AppColors.primaryLight,
         surface: AppColors.surfaceLight,
-        background: AppColors.background,
         onPrimary: AppColors.onPrimary,
         onSecondary: AppColors.onSecondary,
         onSurface: AppColors.onSurface,
-        onBackground: AppColors.onSurface,
         error: AppColors.error,
         onError: Colors.white,
         outline: AppColors.outline,
-        surfaceVariant: AppColors.surfaceVariant,
+        surfaceContainerHighest: AppColors.surfaceVariant,
         onSurfaceVariant: AppColors.onSurfaceVariant,
       ),
 
@@ -63,7 +59,7 @@ class AppTheme {
             backgroundColor: AppColors.primaryDark,
             foregroundColor: AppColors.onPrimary,
             elevation: AppSpacing.elevation2,
-            shadowColor: AppColors.primaryDark.withOpacity(0.3),
+            shadowColor: AppColors.primaryDark.withValues(alpha: 0.3),
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
               vertical: AppSpacing.md,
@@ -74,28 +70,28 @@ class AppTheme {
             textStyle: AppTypography.button,
             minimumSize: const Size(120, 48),
           ).copyWith(
-            backgroundColor: MaterialStateProperty.resolveWith<Color?>((
-              Set<MaterialState> states,
+            backgroundColor: WidgetStateProperty.resolveWith<Color?>((
+              Set<WidgetState> states,
             ) {
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return AppColors.primaryMedium;
               }
-              if (states.contains(MaterialState.pressed)) {
-                return AppColors.primaryDark.withOpacity(0.9);
+              if (states.contains(WidgetState.pressed)) {
+                return AppColors.primaryDark.withValues(alpha: 0.9);
               }
-              if (states.contains(MaterialState.disabled)) {
+              if (states.contains(WidgetState.disabled)) {
                 return AppColors.disabled;
               }
               return AppColors.primaryDark;
             }),
-            overlayColor: MaterialStateProperty.resolveWith<Color?>((
-              Set<MaterialState> states,
+            overlayColor: WidgetStateProperty.resolveWith<Color?>((
+              Set<WidgetState> states,
             ) {
-              if (states.contains(MaterialState.hovered)) {
-                return AppColors.primaryLight.withOpacity(0.1);
+              if (states.contains(WidgetState.hovered)) {
+                return AppColors.primaryLight.withValues(alpha: 0.1);
               }
-              if (states.contains(MaterialState.pressed)) {
-                return AppColors.primaryLight.withOpacity(0.2);
+              if (states.contains(WidgetState.pressed)) {
+                return AppColors.primaryLight.withValues(alpha: 0.2);
               }
               return null;
             }),
@@ -120,21 +116,21 @@ class AppTheme {
             textStyle: AppTypography.button,
             minimumSize: const Size(120, 48),
           ).copyWith(
-            side: MaterialStateProperty.resolveWith<BorderSide?>((
-              Set<MaterialState> states,
+            side: WidgetStateProperty.resolveWith<BorderSide?>((
+              Set<WidgetState> states,
             ) {
-              if (states.contains(MaterialState.hovered)) {
+              if (states.contains(WidgetState.hovered)) {
                 return const BorderSide(
                   color: AppColors.primaryMedium,
                   width: 2,
                 );
               }
-              if (states.contains(MaterialState.disabled)) {
+              if (states.contains(WidgetState.disabled)) {
                 return const BorderSide(color: AppColors.disabled, width: 1);
               }
               return const BorderSide(color: AppColors.primaryDark, width: 1.5);
             }),
-            textStyle: MaterialStateProperty.all(
+            textStyle: WidgetStateProperty.all(
               AppTypography.textTheme.labelLarge?.copyWith(
                 color: AppColors.primaryDark,
               ),
@@ -209,7 +205,7 @@ class AppTheme {
     return CardThemeData(
       color: Colors.white,
       elevation: AppSpacing.elevation1,
-      shadowColor: Colors.black.withOpacity(0.08),
+      shadowColor: Colors.black.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
@@ -236,7 +232,7 @@ class AppTheme {
           Shadow(
             offset: const Offset(0, 2),
             blurRadius: 8,
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -258,15 +254,15 @@ class AppTheme {
   // Checkbox Theme
   static CheckboxThemeData get _checkboxTheme {
     return CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith<Color?>((
-        Set<MaterialState> states,
+      fillColor: WidgetStateProperty.resolveWith<Color?>((
+        Set<WidgetState> states,
       ) {
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return AppColors.primaryDark;
         }
         return AppColors.surfaceLight;
       }),
-      checkColor: MaterialStateProperty.all(AppColors.onPrimary),
+      checkColor: WidgetStateProperty.all(AppColors.onPrimary),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
       ),

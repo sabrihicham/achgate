@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../theme/app_components.dart';
@@ -310,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: Icon(
               Icons.person,
               size: 80,
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
             ),
           ),
         ),
@@ -343,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -356,7 +355,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             children: [
               CircleAvatar(
                 radius: 60,
-                backgroundColor: AppColors.primaryLight.withOpacity(0.2),
+                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.2),
                 child: Text(
                   _currentUser!.name.isNotEmpty
                       ? _currentUser!.name[0].toUpperCase()
@@ -417,8 +416,8 @@ class _ProfileScreenState extends State<ProfileScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: _currentUser!.isActive
-                  ? AppColors.success.withOpacity(0.1)
-                  : AppColors.error.withOpacity(0.1),
+                  ? AppColors.success.withValues(alpha: 0.1)
+                  : AppColors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: _currentUser!.isActive
@@ -462,7 +461,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: _getRoleColor(role).withOpacity(0.1),
+                  color: _getRoleColor(role).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: _getRoleColor(role)),
                 ),
@@ -578,7 +577,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -803,7 +802,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primaryLight.withOpacity(0.1),
+            color: AppColors.primaryLight.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: AppColors.primaryDark, size: 20),
@@ -855,7 +854,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.outline.withOpacity(0.5)),
+          borderSide: BorderSide(color: AppColors.outline.withValues(alpha: 0.5)),
         ),
       ),
     );
@@ -890,7 +889,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.outline.withOpacity(0.5)),
+          borderSide: BorderSide(color: AppColors.outline.withValues(alpha: 0.5)),
         ),
       ),
       items: items.map((String item) {

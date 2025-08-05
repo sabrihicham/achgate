@@ -239,10 +239,10 @@
 //       decoration: BoxDecoration(
 //         color: Colors.white,
 //         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-//         border: Border.all(color: AppColors.outline.withOpacity(0.3)),
+//         border: Border.all(color: AppColors.outline.withValues(alpha: 0.3)),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
+//             color: Colors.black.withValues(alpha: 0.05),
 //             blurRadius: 4,
 //             offset: const Offset(0, 2),
 //           ),
@@ -253,7 +253,7 @@
 //           Container(
 //             padding: EdgeInsets.all(AppSpacing.xs),
 //             decoration: BoxDecoration(
-//               color: AppColors.primaryLight.withOpacity(0.1),
+//               color: AppColors.primaryLight.withValues(alpha: 0.1),
 //               borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
 //             ),
 //             child: Icon(fileIcon, size: 20, color: AppColors.primaryMedium),
@@ -350,9 +350,9 @@
 //         leading: Container(
 //           margin: const EdgeInsets.all(8),
 //           decoration: BoxDecoration(
-//             color: Colors.white.withOpacity(0.2),
+//             color: Colors.white.withValues(alpha: 0.2),
 //             borderRadius: BorderRadius.circular(12),
-//             border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+//             border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
 //           ),
 //           child: IconButton(
 //             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -450,13 +450,13 @@
 //                 colors: [
 //                   AppColors.primaryDark,
 //                   AppColors.primaryMedium,
-//                   AppColors.primaryLight.withOpacity(0.8),
+//                   AppColors.primaryLight.withValues(alpha: 0.8),
 //                 ],
 //               ),
 //               borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
 //               boxShadow: [
 //                 BoxShadow(
-//                   color: AppColors.primaryDark.withOpacity(0.15),
+//                   color: AppColors.primaryDark.withValues(alpha: 0.15),
 //                   blurRadius: 20,
 //                   offset: const Offset(0, 8),
 //                 ),
@@ -471,7 +471,7 @@
 //                     Container(
 //                       padding: EdgeInsets.all(AppSpacing.md),
 //                       decoration: BoxDecoration(
-//                         color: Colors.white.withOpacity(0.2),
+//                         color: Colors.white.withValues(alpha: 0.2),
 //                         borderRadius: BorderRadius.circular(
 //                           AppSpacing.radiusLg,
 //                         ),
@@ -498,7 +498,7 @@
 //                 Text(
 //                   'قم بتعبئة جميع الحقول المطلوبة لإضافة منجز جديد إلى سجلك. تأكد من دقة المعلومات المدخلة.',
 //                   style: AppTypography.textTheme.bodyMedium!.copyWith(
-//                     color: Colors.white.withOpacity(0.9),
+//                     color: Colors.white.withValues(alpha: 0.9),
 //                     height: 1.6,
 //                   ),
 //                 ),
@@ -562,7 +562,7 @@
 //                           child: Text(
 //                             tip,
 //                             style: AppTypography.textTheme.bodySmall!.copyWith(
-//                               color: Colors.white.withOpacity(0.8),
+//                               color: Colors.white.withValues(alpha: 0.8),
 //                             ),
 //                           ),
 //                         ),
@@ -585,7 +585,7 @@
 //         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.08),
+//             color: Colors.black.withValues(alpha: 0.08),
 //             blurRadius: 20,
 //             offset: const Offset(0, 8),
 //           ),
@@ -1177,12 +1177,12 @@
 //                         width: double.infinity,
 //                         padding: EdgeInsets.all(AppSpacing.md),
 //                         decoration: BoxDecoration(
-//                           color: AppColors.primaryLight.withOpacity(0.05),
+//                           color: AppColors.primaryLight.withValues(alpha: 0.05),
 //                           borderRadius: BorderRadius.circular(
 //                             AppSpacing.radiusSm,
 //                           ),
 //                           border: Border.all(
-//                             color: AppColors.primaryLight.withOpacity(0.2),
+//                             color: AppColors.primaryLight.withValues(alpha: 0.2),
 //                           ),
 //                         ),
 //                         child: Column(
@@ -1265,7 +1265,7 @@
 //                   boxShadow: hasFocus
 //                       ? [
 //                           BoxShadow(
-//                             color: AppColors.primaryMedium.withOpacity(0.15),
+//                             color: AppColors.primaryMedium.withValues(alpha: 0.15),
 //                             blurRadius: 8,
 //                             offset: const Offset(0, 2),
 //                           ),
@@ -1343,7 +1343,7 @@
 //               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
 //               boxShadow: [
 //                 BoxShadow(
-//                   color: AppColors.primaryDark.withOpacity(0.3),
+//                   color: AppColors.primaryDark.withValues(alpha: 0.3),
 //                   blurRadius: 12,
 //                   offset: const Offset(0, 6),
 //                 ),
@@ -1610,7 +1610,7 @@
 //             Container(
 //               padding: EdgeInsets.all(AppSpacing.sm),
 //               decoration: BoxDecoration(
-//                 color: AppColors.error.withOpacity(0.1),
+//                 color: AppColors.error.withValues(alpha: 0.1),
 //                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
 //               ),
 //               child: const Icon(
@@ -1659,7 +1659,7 @@
 //             Container(
 //               padding: EdgeInsets.all(AppSpacing.sm),
 //               decoration: BoxDecoration(
-//                 color: AppColors.success.withOpacity(0.1),
+//                 color: AppColors.success.withValues(alpha: 0.1),
 //                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
 //               ),
 //               child: const Icon(

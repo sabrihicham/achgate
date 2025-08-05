@@ -127,7 +127,7 @@ class _HoverCardState extends State<_HoverCard>
                       widget.boxShadow ??
                       [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: _elevationAnimation.value * 3,
                           offset: Offset(0, _elevationAnimation.value),
                         ),
@@ -183,7 +183,7 @@ class _HoverButtonState extends State<_HoverButton>
     _colorAnimation =
         ColorTween(
           begin: widget.backgroundColor,
-          end: widget.backgroundColor.withOpacity(0.8),
+          end: widget.backgroundColor.withValues(alpha: 0.8),
         ).animate(
           CurvedAnimation(
             parent: _animationController,
@@ -220,7 +220,7 @@ class _HoverButtonState extends State<_HoverButton>
                   borderRadius: widget.borderRadius,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
