@@ -4,6 +4,7 @@ import 'package:achgate/services/auth_service.dart';
 import 'package:achgate/theme/app_theme.dart';
 import 'package:achgate/view/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,6 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    // Discard autofill context if not saved
+    TextInput.finishAutofillContext(shouldSave: false);
     super.dispose();
   }
 
@@ -52,6 +55,12 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         if (userCredential != null && mounted) {
+          // Save credentials for autofill if remember me is checked
+          if (_rememberMe) {
+            // Trigger autofill save
+            TextInput.finishAutofillContext();
+          }
+
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -188,28 +197,31 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Username field
-            _buildInputField(
-              controller: _emailController,
-              label: 'البريد الإلكتروني',
-              hint: 'أدخل البريد الإلكتروني',
-              icon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'يرجى إدخال البريد الإلكتروني';
-                }
-                if (!_authService.isEmailValid(value.trim())) {
-                  return 'يرجى إدخال بريد إلكتروني صحيح';
-                }
-                return null;
-              },
-            ),
+      child: AutofillGroup(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Username field
+              _buildInputField(
+                controller: _emailController,
+                label: 'البريد الإلكتروني',
+                hint: 'أدخل البريد الإلكتروني',
+                icon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email, AutofillHints.username],
+                textInputAction: TextInputAction.next,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'يرجى إدخال البريد الإلكتروني';
+                  }
+                  if (!_authService.isEmailValid(value.trim())) {
+                    return 'يرجى إدخال بريد إلكتروني صحيح';
+                  }
+                  return null;
+                },
+              ),
 
             SizedBox(height: MediaQuery.of(context).size.width > 768 ? 24 : 20),
 
@@ -221,6 +233,8 @@ class _LoginScreenState extends State<LoginScreen> {
               icon: Icons.lock_outline,
               obscureText: _obscurePassword,
               keyboardType: TextInputType.visiblePassword,
+              autofillHints: const [AutofillHints.password],
+              textInputAction: TextInputAction.done,
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -429,6 +443,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -442,6 +457,7 @@ class _LoginScreenState extends State<LoginScreen> {
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
     String? Function(String?)? validator,
+    List<String>? autofillHints,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 1024;
@@ -468,6 +484,7 @@ class _LoginScreenState extends State<LoginScreen> {
           validator: validator,
           textInputAction: textInputAction,
           keyboardType: keyboardType,
+          autofillHints: autofillHints,
           style: TextStyle(fontSize: fontSize),
           decoration: InputDecoration(
             hintText: hint,
