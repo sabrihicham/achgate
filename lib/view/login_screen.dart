@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
   bool _rememberMe = false;
@@ -24,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        final email = _usernameController.text.trim();
+        final email = _emailController.text.trim();
         final password = _passwordController.text;
 
         // Validate email format
@@ -195,10 +195,11 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             // Username field
             _buildInputField(
-              controller: _usernameController,
+              controller: _emailController,
               label: 'البريد الإلكتروني',
               hint: 'أدخل البريد الإلكتروني',
               icon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'يرجى إدخال البريد الإلكتروني';
@@ -219,6 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
               hint: 'أدخل كلمة المرور',
               icon: Icons.lock_outline,
               obscureText: _obscurePassword,
+              keyboardType: TextInputType.visiblePassword,
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -437,6 +439,8 @@ class _LoginScreenState extends State<LoginScreen> {
     required IconData icon,
     bool obscureText = false,
     Widget? suffixIcon,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -462,6 +466,8 @@ class _LoginScreenState extends State<LoginScreen> {
           textAlign: TextAlign.right,
           textDirection: TextDirection.rtl,
           validator: validator,
+          textInputAction: textInputAction,
+          keyboardType: keyboardType,
           style: TextStyle(fontSize: fontSize),
           decoration: InputDecoration(
             hintText: hint,
