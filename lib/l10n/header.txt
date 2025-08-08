@@ -1,0 +1,4 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// This file was automatically generated using flutter_gen
+// Localization files for ACHGate Application
+// Generated on: {timestamp}

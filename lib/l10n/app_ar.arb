@@ -1,0 +1,610 @@
+{
+  "@@locale": "ar",
+  "@@last_modified": "2025-01-08T10:00:00.000Z",
+  
+  "appTitle": "بوابة الإنجازات",
+  "@appTitle": {
+    "description": "عنوان التطبيق الرئيسي"
+  },
+  
+  "healthCluster": "تجمع جدة الصحي الثاني",
+  "@healthCluster": {
+    "description": "اسم التجمع الصحي"
+  },
+
+    "portalAdministration": "لوحة التحكم الإدارية",
+    "@portalAdministration": {
+        "description": "لوحة التحكم الإدارية"
+    },
+  
+  "welcome": "مرحباً",
+  "@welcome": {
+    "description": "رسالة الترحيب"
+  },
+  
+  "login": "تسجيل الدخول",
+  "@login": {
+    "description": "تسجيل الدخول"
+  },
+  
+  "logout": "تسجيل الخروج",
+  "@logout": {
+    "description": "تسجيل الخروج"
+  },
+
+  "adminDashboard": "لوحة تحكم المدير",
+  "@adminDashboard": {
+    "description": "لوحة تحكم المدير"
+  },
+
+  "mainDashboard": "الواجهة الرئيسية",
+  "@mainDashboard": {
+    "description": "الواجهة الرئيسية"
+  },
+
+  "quickReview": "مراجعة سريعة",
+  "@quickReview": {
+    "description": "مراجعة سريعة"
+  },
+
+  "achievementsManagement": "إدارة الإنجازات",
+  "@achievementsManagement": {
+    "description": "إدارة الإنجازات"
+  },
+
+  "usersManagement": "إدارة المستخدمين",
+  "@usersManagement": {
+    "description": "إدارة المستخدمين"
+  },
+
+  "reportsAndAnalytics": "التقارير والتحليل",
+  "@reportsAndAnalytics": {
+    "description": "التقارير والتحليل"
+  },
+
+  "adminSettings": "إعدادات المدير",
+  "@adminSettings": {
+    "description": "إعدادات المدير"
+  },
+
+  "systemSettings": "إعدادات النظام",
+  "@systemSettings": {
+    "description": "إعدادات النظام"
+  },
+
+  "email": "البريد الإلكتروني",
+  "@email": {
+    "description": "البريد الإلكتروني"
+  },
+  
+  "password": "كلمة المرور",
+  "@password": {
+    "description": "كلمة المرور"
+  },
+  
+  "forgotPassword": "نسيت كلمة المرور؟",
+  "@forgotPassword": {
+    "description": "نسيت كلمة المرور"
+  },
+  
+  "rememberMe": "تذكرني",
+  "@rememberMe": {
+    "description": "تذكرني"
+  },
+  
+  "home": "الرئيسية",
+  "@home": {
+    "description": "الصفحة الرئيسية"
+  },
+  
+  "achievements": "الإنجازات",
+  "@achievements": {
+    "description": "الإنجازات"
+  },
+  
+  "addAchievement": "إضافة إنجاز",
+  "@addAchievement": {
+    "description": "إضافة إنجاز جديد"
+  },
+  
+  "viewAchievements": "عرض الإنجازات",
+  "@viewAchievements": {
+    "description": "عرض جميع الإنجازات"
+  },
+  
+  "profile": "الملف الشخصي",
+  "@profile": {
+    "description": "الملف الشخصي"
+  },
+  
+  "settings": "الإعدادات",
+  "@settings": {
+    "description": "الإعدادات"
+  },
+  
+  "theme": "المظهر",
+  "@theme": {
+    "description": "إعدادات المظهر"
+  },
+  
+  "language": "اللغة",
+  "@language": {
+    "description": "إعدادات اللغة"
+  },
+  
+  "arabic": "العربية",
+  "@arabic": {
+    "description": "اللغة العربية"
+  },
+  
+  "english": "English",
+  "@english": {
+    "description": "اللغة الإنجليزية"
+  },
+  
+  "lightMode": "فاتح",
+  "@lightMode": {
+    "description": "المظهر الفاتح"
+  },
+  
+  "darkMode": "داكن",
+  "@darkMode": {
+    "description": "المظهر الداكن"
+  },
+  
+  "systemMode": "تلقائي",
+  "@systemMode": {
+    "description": "المظهر التلقائي"
+  },
+  
+  "name": "الاسم",
+  "@name": {
+    "description": "الاسم"
+  },
+  
+  "employeeNumber": "رقم الموظف",
+  "@employeeNumber": {
+    "description": "رقم الموظف"
+  },
+  
+  "jobTitle": "المسمى الوظيفي",
+  "@jobTitle": {
+    "description": "المسمى الوظيفي"
+  },
+  
+  "phone": "رقم الهاتف",
+  "@phone": {
+    "description": "رقم الهاتف"
+  },
+  
+  "department": "الإدارة",
+  "@department": {
+    "description": "الإدارة"
+  },
+  
+  "executiveDepartment": "الإدارة التنفيذية",
+  "@executiveDepartment": {
+    "description": "الإدارة التنفيذية"
+  },
+  
+  "mainDepartment": "الإدارة الرئيسية",
+  "@mainDepartment": {
+    "description": "الإدارة الرئيسية"
+  },
+  
+  "subDepartment": "الإدارة الفرعية",
+  "@subDepartment": {
+    "description": "الإدارة الفرعية"
+  },
+  
+  "save": "حفظ",
+  "@save": {
+    "description": "حفظ"
+  },
+  
+  "cancel": "إلغاء",
+  "@cancel": {
+    "description": "إلغاء"
+  },
+  
+  "edit": "تعديل",
+  "@edit": {
+    "description": "تعديل"
+  },
+  
+  "delete": "حذف",
+  "@delete": {
+    "description": "حذف"
+  },
+  
+  "view": "عرض",
+  "@view": {
+    "description": "عرض"
+  },
+  
+  "search": "بحث",
+  "@search": {
+    "description": "بحث"
+  },
+  
+  "filter": "تصفية",
+  "@filter": {
+    "description": "تصفية"
+  },
+  
+  "all": "الكل",
+  "@all": {
+    "description": "الكل"
+  },
+  
+  "pending": "معلق",
+  "@pending": {
+    "description": "حالة معلقة"
+  },
+  
+  "totalAchievements": "إجمالي الإنجازات",
+  "@totalAchievements": {
+    "description": "إجمالي الإنجازات"
+  },
+
+  "pendingAchievements": "الإنجازات المعلقة",
+  "@pendingAchievements": {
+    "description": "الإنجازات المعلقة"
+  },
+
+  "approvedAchievements": "الإنجازات المعتمدة",
+  "@approvedAchievements": {
+    "description": "الإنجازات المعتمدة"
+  },
+
+  "rejectedAchievements": "الإنجازات المرفوضة",
+  "@rejectedAchievements": {
+    "description": "الإنجازات المرفوضة"
+  },
+
+  "welcomeToDashboard": "مرحباً بك في لوحة التحكم",
+  "@welcomeToDashboard": {
+    "description": "ترحيب بلوحة التحكم"
+  },
+
+  "trackAchievementsEasily": "تتبع الإنجازات وإدارة النظام بسهولة",
+  "@trackAchievementsEasily": {
+    "description": "وصف تتبع الإنجازات"
+  },
+
+  "refreshData": "تحديث البيانات",
+  "@refreshData": {
+    "description": "تحديث البيانات"
+  },
+
+  "generalSettings": "الإعدادات العامة",
+  "@generalSettings": {
+    "description": "الإعدادات العامة"
+  },
+
+  "appearanceAndInterface": "المظهر والواجهة",
+  "@appearanceAndInterface": {
+    "description": "المظهر والواجهة"
+  },
+
+  "notifications": "الإشعارات",
+  "@notifications": {
+    "description": "الإشعارات"
+  },
+
+  "securityAndProtection": "الأمان والحماية",
+  "@securityAndProtection": {
+    "description": "الأمان والحماية"
+  },
+
+  "usersAndRoles": "المستخدمين والأدوار",
+  "@usersAndRoles": {
+    "description": "المستخدمين والأدوار"
+  },
+
+  "systemAndMaintenance": "النظام والصيانة",
+  "@systemAndMaintenance": {
+    "description": "النظام والصيانة"
+  },
+
+  "integrationAndAPI": "التكامل وواجهة برمجة التطبيقات",
+  "@integrationAndAPI": {
+    "description": "التكامل وواجهة برمجة التطبيقات"
+  },
+
+  "approved": "معتمد",
+  "@approved": {
+    "description": "حالة معتمدة"
+  },
+
+  "activeUsers": "المستخدمين النشطين",
+  "@activeUsers": {
+    "description": "المستخدمين النشطين"
+  },
+
+  "mostActiveDepartments": "أنشط الأقسام",
+  "@mostActiveDepartments": {
+    "description": "أنشط الأقسام"
+  },
+
+  "rejected": "مرفوض",
+  "@rejected": {
+    "description": "حالة مرفوضة"
+  },
+  
+  "subject": "الموضوع",
+  "@subject": {
+    "description": "موضوع الإنجاز"
+  },
+  
+  "goal": "الهدف",
+  "@goal": {
+    "description": "هدف الإنجاز"
+  },
+  
+  "date": "التاريخ",
+  "@date": {
+    "description": "التاريخ"
+  },
+  
+  "description": "الوصف",
+  "@description": {
+    "description": "الوصف"
+  },
+  
+  "attachments": "المرفقات",
+  "@attachments": {
+    "description": "المرفقات"
+  },
+  
+  "status": "الحالة",
+  "@status": {
+    "description": "الحالة"
+  },
+  
+  "loading": "جاري التحميل...",
+  "@loading": {
+    "description": "رسالة التحميل"
+  },
+  
+  "error": "خطأ",
+  "@error": {
+    "description": "رسالة خطأ"
+  },
+  
+  "success": "نجح",
+  "@success": {
+    "description": "رسالة نجاح"
+  },
+  
+  "warning": "تحذير",
+  "@warning": {
+    "description": "رسالة تحذير"
+  },
+  
+  "info": "معلومات",
+  "@info": {
+    "description": "رسالة معلومات"
+  },
+  
+  "confirm": "تأكيد",
+  "@confirm": {
+    "description": "تأكيد"
+  },
+  
+  "yes": "نعم",
+  "@yes": {
+    "description": "نعم"
+  },
+  
+  "no": "لا",
+  "@no": {
+    "description": "لا"
+  },
+  
+  "ok": "موافق",
+  "@ok": {
+    "description": "موافق"
+  },
+  
+  "close": "إغلاق",
+  "@close": {
+    "description": "إغلاق"
+  },
+  
+  "refresh": "تحديث",
+  "@refresh": {
+    "description": "تحديث"
+  },
+  
+  "retry": "إعادة المحاولة",
+  "@retry": {
+    "description": "إعادة المحاولة"
+  },
+  
+  "noData": "لا توجد بيانات",
+  "@noData": {
+    "description": "لا توجد بيانات"
+  },
+  
+  "selectDate": "اختر التاريخ",
+  "@selectDate": {
+    "description": "اختيار التاريخ"
+  },
+  
+  "selectDepartment": "اختر الإدارة",
+  "@selectDepartment": {
+    "description": "اختيار الإدارة"
+  },
+  
+  "required": "مطلوب",
+  "@required": {
+    "description": "حقل مطلوب"
+  },
+  
+  "invalidEmail": "بريد إلكتروني غير صحيح",
+  "@invalidEmail": {
+    "description": "بريد إلكتروني غير صحيح"
+  },
+  
+  "invalidPassword": "كلمة مرور غير صحيحة",
+  "@invalidPassword": {
+    "description": "كلمة مرور غير صحيحة"
+  },
+  
+  "loginSuccess": "تم تسجيل الدخول بنجاح",
+  "@loginSuccess": {
+    "description": "رسالة نجاح تسجيل الدخول"
+  },
+  
+  "logoutSuccess": "تم تسجيل الخروج بنجاح",
+  "@logoutSuccess": {
+    "description": "رسالة نجاح تسجيل الخروج"
+  },
+  
+  "saveSuccess": "تم الحفظ بنجاح",
+  "@saveSuccess": {
+    "description": "رسالة نجاح الحفظ"
+  },
+  
+  "deleteSuccess": "تم الحذف بنجاح",
+  "@deleteSuccess": {
+    "description": "رسالة نجاح الحذف"
+  },
+  
+  "updateSuccess": "تم التحديث بنجاح",
+  "@updateSuccess": {
+    "description": "رسالة نجاح التحديث"
+  },
+  
+  "networkError": "خطأ في الاتصال بالشبكة",
+  "@networkError": {
+    "description": "خطأ في الشبكة"
+  },
+  
+  "serverError": "خطأ في الخادم",
+  "@serverError": {
+    "description": "خطأ في الخادم"
+  },
+  
+  "permissionDenied": "ليس لديك صلاحية للوصول",
+  "@permissionDenied": {
+    "description": "رفض الصلاحية"
+  },
+  
+  "admin": "المدير",
+  "@admin": {
+    "description": "المدير"
+  },
+  
+  "dashboard": "لوحة التحكم",
+  "@dashboard": {
+    "description": "لوحة التحكم"
+  },
+  
+  "users": "المستخدمون",
+  "@users": {
+    "description": "المستخدمون"
+  },
+  
+  "reports": "التقارير",
+  "@reports": {
+    "description": "التقارير"
+  },
+  
+  "statistics": "الإحصائيات",
+  "@statistics": {
+    "description": "الإحصائيات"
+  },
+  
+  "total": "المجموع",
+  "@total": {
+    "description": "المجموع"
+  },
+  
+  "today": "اليوم",
+  "@today": {
+    "description": "اليوم"
+  },
+  
+  "yesterday": "أمس",
+  "@yesterday": {
+    "description": "أمس"
+  },
+  
+  "thisWeek": "هذا الأسبوع",
+  "@thisWeek": {
+    "description": "هذا الأسبوع"
+  },
+  
+  "thisMonth": "هذا الشهر",
+  "@thisMonth": {
+    "description": "هذا الشهر"
+  },
+  
+  "thisYear": "هذا العام",
+  "@thisYear": {
+    "description": "هذا العام"
+  },
+  
+  "version": "الإصدار",
+  "@version": {
+    "description": "رقم الإصدار"
+  },
+  
+  "about": "حول",
+  "@about": {
+    "description": "حول التطبيق"
+  },
+  
+  "help": "المساعدة",
+  "@help": {
+    "description": "المساعدة"
+  },
+  
+  "contact": "اتصل بنا",
+  "@contact": {
+    "description": "التواصل"
+  },
+  
+  "privacyPolicy": "سياسة الخصوصية",
+  "@privacyPolicy": {
+    "description": "سياسة الخصوصية"
+  },
+  
+  "termsOfService": "شروط الخدمة",
+  "@termsOfService": {
+    "description": "شروط الخدمة"
+  },
+  
+  "changeLanguage": "تغيير اللغة",
+  "@changeLanguage": {
+    "description": "تغيير اللغة"
+  },
+  
+  "languageChangedTo": "تم تغيير اللغة إلى {language}",
+  "@languageChangedTo": {
+    "description": "رسالة تأكيد تغيير اللغة",
+    "placeholders": {
+      "language": {
+        "type": "String",
+        "description": "اسم اللغة الجديدة"
+      }
+    }
+  },
+  
+  "selectLanguage": "اختر اللغة",
+  "@selectLanguage": {
+    "description": "اختيار اللغة"
+  },
+  
+  "currentLanguage": "اللغة الحالية",
+  "@currentLanguage": {
+    "description": "اللغة الحالية"
+  },
+  
+  "languageSettings": "إعدادات اللغة",
+  "@languageSettings": {
+    "description": "إعدادات اللغة"
+  }
+}

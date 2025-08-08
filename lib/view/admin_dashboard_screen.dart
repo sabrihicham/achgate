@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../theme/app_components.dart';
 import '../services/admin_service.dart';
 import '../services/auth_service.dart';
 import '../services/admin_auth_service.dart';
+import '../services/global_theme_manager.dart';
+import '../services/language_manager.dart';
 import '../core/app_router.dart';
 import '../models/achievement.dart';
 import '../widgets/users_management_widget.dart';
+import '../widgets/charts_widget.dart';
+import '../widgets/language_widgets.dart';
+import '../generated/l10n/app_localizations.dart';
 import 'login_screen.dart';
 import 'edit_achievement_screen.dart';
 import 'profile_demo_screen.dart';
@@ -38,46 +44,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   final List<Achievement> _achievements = [];
   final List<Achievement> _pendingAchievements = [];
 
-  // Success and warning colors for the theme
-  static const Color successColor = Color(0xFF4CAF50);
-  static const Color warningColor = Color(0xFFFF9800);
-  static const Color errorColor = Color(0xFFF44336);
+  // Theme-aware color helpers - Legacy getters for backward compatibility
+  Color get successColor =>
+      GlobalThemeManager.isDarkMode ? DarkColors.success : AppColors.success;
+  Color get warningColor =>
+      GlobalThemeManager.isDarkMode ? DarkColors.warning : AppColors.warning;
+  Color get errorColor =>
+      GlobalThemeManager.isDarkMode ? DarkColors.error : AppColors.error;
 
   final List<Map<String, dynamic>> _sidebarItems = [
     {
       'icon': Icons.dashboard_outlined,
       'activeIcon': Icons.dashboard,
-      'title': 'لوحة التحكم الرئيسية',
+      'titleKey': 'mainDashboard',
       'index': 0,
     },
     {
       'icon': Icons.pending_actions_outlined,
       'activeIcon': Icons.pending_actions,
-      'title': 'المراجعة السريعة',
+      'titleKey': 'quickReview',
       'index': 1,
     },
     {
       'icon': Icons.assignment_outlined,
       'activeIcon': Icons.assignment,
-      'title': 'إدارة المنجزات',
+      'titleKey': 'achievementsManagement',
       'index': 2,
     },
     {
       'icon': Icons.people_outline,
       'activeIcon': Icons.people,
-      'title': 'إدارة المستخدمين',
+      'titleKey': 'usersManagement',
       'index': 3,
     },
     {
       'icon': Icons.analytics_outlined,
       'activeIcon': Icons.analytics,
-      'title': 'التقارير والتحليلات',
+      'titleKey': 'reportsAndAnalytics',
       'index': 4,
     },
     {
       'icon': Icons.settings_outlined,
       'activeIcon': Icons.settings,
-      'title': 'الإعدادات الإدارية',
+      'titleKey': 'adminSettings',
       'index': 5,
     },
   ];
@@ -86,8 +95,86 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   void initState() {
     super.initState();
     _initializeAnimations();
+    _initializeTheme();
+    _setupThemeListener();
     // _scrollController.addListener(_onScroll);
     _checkAdminAccess();
+  }
+
+  void _setupThemeListener() {
+    GlobalThemeManager.addListener(() {
+      if (mounted) {
+        setState(() {
+          // تحديث الواجهة عند تغيير الثيم
+        });
+      }
+    });
+  }
+
+  void _initializeTheme() async {
+    await GlobalThemeManager.initialize();
+    if (mounted) {
+      setState(() {
+        // تحديث الواجهة بعد تهيئة الثيم
+      });
+    }
+  }
+
+  /// تغيير الثيم مع تحديث فوري للواجهة
+  Future<void> _changeTheme(String themeMode) async {
+    try {
+      // عرض مؤشر التحميل للويب
+      if (!mounted) return;
+
+      // تطبيق الثيم الجديد
+      await GlobalThemeManager.setThemeMode(themeMode);
+
+      // تحديث الواجهة فوراً
+      if (mounted) {
+        setState(() {
+          // إعادة بناء الواجهة مع الثيم الجديد
+        });
+
+        // إظهار رسالة نجاح
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'تم تغيير المظهر إلى ${_getThemeDisplayName(themeMode)}',
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('خطأ في تغيير المظهر: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// الحصول على اسم الثيم بالعربية
+  String _getThemeDisplayName(String themeMode) {
+    switch (themeMode) {
+      case 'light':
+        return 'الفاتح';
+      case 'dark':
+        return 'الداكن';
+      case 'system':
+        return 'التلقائي';
+      default:
+        return 'غير معروف';
+    }
   }
 
   void _initializeAnimations() {
@@ -107,8 +194,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-        );
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
 
     // Start animations
     _fadeController.forward();
@@ -171,7 +258,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       await _adminService.updateAchievementStatus(id, 'approved');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('تم اعتماد المنجز بنجاح'),
             backgroundColor: successColor,
           ),
@@ -194,7 +281,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       await _adminService.updateAchievementStatus(id, 'rejected');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('تم رفض المنجز'),
             backgroundColor: errorColor,
           ),
@@ -217,7 +304,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       await _adminService.deleteAchievement(id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('تم حذف المنجز بنجاح'),
             backgroundColor: successColor,
           ),
@@ -257,7 +344,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: GlobalThemeManager.isDarkMode
+            ? DarkColors.background
+            : AppColors.surfaceLight,
         body: Center(
           child: AppComponents.loadingIndicator(
             message: 'جارٍ التحقق من الصلاحيات...',
@@ -323,15 +412,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.primaryDark,
-                  AppColors.primaryMedium,
-                  AppColors.primaryLight.withValues(alpha: 0.8),
-                ],
+                colors: GlobalThemeManager.isDarkMode
+                    ? [
+                        DarkColors.primaryDark,
+                        DarkColors.primaryMedium,
+                        DarkColors.primaryLight.withValues(alpha: 0.8),
+                      ]
+                    : [
+                        AppColors.primaryDark,
+                        AppColors.primaryMedium,
+                        AppColors.primaryLight.withValues(alpha: 0.8),
+                      ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryDark.withValues(alpha: 0.1),
+                  color: (GlobalThemeManager.isDarkMode
+                          ? DarkColors.primaryDark
+                          : AppColors.primaryDark)
+                      .withValues(alpha: 0.1),
                   blurRadius: 20,
                   offset: const Offset(2, 0),
                 ),
@@ -341,7 +439,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               children: [
                 // Logo Section
                 _buildSidebarHeader(),
-                const SizedBox(height: 40),
+                SizedBox(height: 40),
                 // Navigation Items
                 Expanded(child: _buildSidebarNavigation()),
                 // User Profile Section
@@ -376,18 +474,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
-            'لوحة التحكم الإدارية',
+            AppLocalizations.of(context)!.portalAdministration,
             style: AppTypography.textTheme.titleMedium?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
-            'تجمع جدة الصحي الثاني',
+            AppLocalizations.of(context)!.healthCluster,
             style: AppTypography.textTheme.bodySmall?.copyWith(
               color: Colors.white.withValues(alpha: 0.8),
             ),
@@ -410,20 +508,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           animation: _slideAnimation,
           builder: (context, child) {
             return SlideTransition(
-              position:
-                  Tween<Offset>(
-                    begin: const Offset(-1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(
-                      parent: _slideController,
-                      curve: Interval(
-                        index * 0.1,
-                        1.0,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    ),
+              position: Tween<Offset>(
+                begin: const Offset(-1.0, 0.0),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(
+                  parent: _slideController,
+                  curve: Interval(
+                    index * 0.1,
+                    1.0,
+                    curve: Curves.easeOutCubic,
                   ),
+                ),
+              ),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: Material(
@@ -454,17 +551,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                             color: Colors.white,
                             size: 24,
                           ),
-                          const SizedBox(width: 16),
+                          SizedBox(width: 16),
                           Expanded(
                             child: Text(
-                              item['title'],
-                              style: AppTypography.textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                  ),
+                              _getLocalizedTitle(item['titleKey']),
+                              style:
+                                  AppTypography.textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
                             ),
                           ),
                         ],
@@ -488,27 +585,41 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       decoration: BoxDecoration(
         gradient: _isScrolled
             ? LinearGradient(
-                colors: [
-                  Colors.white.withValues(alpha: 0.98),
-                  Colors.white.withValues(alpha: 0.95),
-                ],
+                colors: GlobalThemeManager.isDarkMode
+                    ? [
+                        DarkColors.surface.withValues(alpha: 0.98),
+                        DarkColors.surface.withValues(alpha: 0.95),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.98),
+                        Colors.white.withValues(alpha: 0.95),
+                      ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               )
             : LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primaryDark.withValues(alpha: 0.95),
-                  AppColors.primaryMedium.withValues(alpha: 0.90),
-                  AppColors.primaryLight.withValues(alpha: 0.85),
-                ],
+                colors: GlobalThemeManager.isDarkMode
+                    ? [
+                        DarkColors.primaryDark.withValues(alpha: 0.95),
+                        DarkColors.primaryMedium.withValues(alpha: 0.90),
+                        DarkColors.primaryLight.withValues(alpha: 0.85),
+                      ]
+                    : [
+                        AppColors.primaryDark.withValues(alpha: 0.95),
+                        AppColors.primaryMedium.withValues(alpha: 0.90),
+                        AppColors.primaryLight.withValues(alpha: 0.85),
+                      ],
                 stops: const [0.0, 0.6, 1.0],
               ),
         boxShadow: _isScrolled
             ? [
                 BoxShadow(
-                  color: AppColors.primaryDark.withValues(alpha: 0.15),
+                  color: (GlobalThemeManager.isDarkMode
+                          ? DarkColors.primaryDark
+                          : AppColors.primaryDark)
+                      .withValues(alpha: 0.15),
                   blurRadius: 25,
                   offset: const Offset(0, 8),
                   spreadRadius: 2,
@@ -521,7 +632,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ]
             : [
                 BoxShadow(
-                  color: AppColors.primaryDark.withValues(alpha: 0.3),
+                  color: (GlobalThemeManager.isDarkMode
+                          ? DarkColors.primaryDark
+                          : AppColors.primaryDark)
+                      .withValues(alpha: 0.3),
                   blurRadius: 30,
                   offset: const Offset(0, 10),
                   spreadRadius: 3,
@@ -534,7 +648,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ],
         border: _isScrolled
             ? Border.all(
-                color: AppColors.primaryLight.withValues(alpha: 0.3),
+                color: (GlobalThemeManager.isDarkMode
+                        ? DarkColors.primaryLight
+                        : AppColors.primaryLight)
+                    .withValues(alpha: 0.3),
                 width: 1.5,
               )
             : Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
@@ -558,16 +675,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       style: AppTypography.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: _isScrolled
-                            ? AppColors.primaryDark
+                            ? (GlobalThemeManager.isDarkMode
+                                ? DarkColors.onSurface
+                                : AppColors.primaryDark)
                             : Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       _getPageSubtitle(),
                       style: AppTypography.textTheme.bodyLarge?.copyWith(
                         color: _isScrolled
-                            ? AppColors.primaryDark.withValues(alpha: 0.7)
+                            ? (GlobalThemeManager.isDarkMode
+                                ? DarkColors.onSurfaceVariant
+                                : AppColors.primaryDark.withValues(alpha: 0.7))
                             : Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
@@ -580,16 +701,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   _buildModernAppBarButton(
                     icon: Icons.refresh,
                     onPressed: () => _refreshData(),
-                    tooltip: 'تحديث البيانات',
+                    tooltip: AppLocalizations.of(context)!.refreshData,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
+                  // Language Switch Button
+                  Tooltip(
+                    message: LanguageManager.isArabic
+                        ? 'تغيير إلى الإنجليزية'
+                        : 'Change to Arabic',
+                    child: QuickLanguageSwitch(
+                      onLanguageChanged: (locale) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              LanguageManager.isArabic
+                                  ? 'تم تغيير اللغة إلى ${LanguageManager.getLanguageNameInArabic(locale)}'
+                                  : 'Language changed to ${LanguageManager.getLanguageNameInEnglish(locale)}',
+                            ),
+                            backgroundColor: AppColors.primaryDark,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 12),
                   _buildModernAppBarButton(
                     icon: Icons.notifications_outlined,
                     onPressed: () {},
                     tooltip: 'الإشعارات',
                     hasNotification: true,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   _buildModernAppBarButton(
                     icon: Icons.account_circle_outlined,
                     onPressed: () {
@@ -691,21 +834,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   }
 
   String _getPageTitle() {
+    final localizations = AppLocalizations.of(context)!;
     switch (_selectedSidebarIndex) {
       case 0:
-        return 'لوحة التحكم الرئيسية';
+        return localizations.mainDashboard;
       case 1:
-        return 'المراجعة السريعة';
+        return localizations.quickReview;
       case 2:
-        return 'إدارة المنجزات';
+        return localizations.achievementsManagement;
       case 3:
-        return 'إدارة المستخدمين';
+        return localizations.usersManagement;
       case 4:
-        return 'التقارير والتحليلات';
+        return localizations.reportsAndAnalytics;
       case 5:
-        return 'الإعدادات الإدارية';
+        return localizations.adminSettings;
       default:
-        return 'لوحة التحكم الرئيسية';
+        return localizations.mainDashboard;
     }
   }
 
@@ -725,6 +869,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         return 'إعدادات النظام والتحكم في الصلاحيات';
       default:
         return 'نظرة شاملة على أداء النظام والإحصائيات الحالية';
+    }
+  }
+
+  String _getLocalizedTitle(String titleKey) {
+    final localizations = AppLocalizations.of(context)!;
+    switch (titleKey) {
+      case 'mainDashboard':
+        return localizations.mainDashboard;
+      case 'quickReview':
+        return localizations.quickReview;
+      case 'achievementsManagement':
+        return localizations.achievementsManagement;
+      case 'usersManagement':
+        return localizations.usersManagement;
+      case 'reportsAndAnalytics':
+        return localizations.reportsAndAnalytics;
+      case 'adminSettings':
+        return localizations.adminSettings;
+      default:
+        return titleKey; // fallback to the key itself
     }
   }
 
@@ -918,19 +1082,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               children: [
                 // Welcome Section with Enhanced Design
                 _buildEnhancedWelcomeSection(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
 
                 // Quick Stats Section
                 _buildQuickStatsSection(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
 
                 // Enhanced KPI Cards Grid
                 _buildEnhancedKPICardsGrid(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
 
                 // Analytics Section
                 _buildAnalyticsSection(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
 
                 // Bottom Actions Section
                 _buildBottomActionsSection(),
@@ -967,18 +1131,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'مرحباً بك في لوحة التحكم',
+                  AppLocalizations.of(context)!.welcomeToDashboard,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
-                  'تتبع الإنجازات وإدارة النظام بسهولة',
+                  AppLocalizations.of(context)!.trackAchievementsEasily,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
                 ),
               ],
             ),
@@ -994,31 +1158,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       children: [
         Expanded(
           child: _buildQuickStatCard(
-            'الإنجازات المعلقة',
+            AppLocalizations.of(context)!.pendingAchievements,
             '${_pendingAchievements.length}',
             Icons.pending_actions,
             warningColor,
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         Expanded(
           child: _buildQuickStatCard(
-            'إجمالي الإنجازات',
+            AppLocalizations.of(context)!.totalAchievements,
             '${_achievements.length}',
             Icons.emoji_events,
             successColor,
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         Expanded(
           child: _buildQuickStatCard(
-            'المستخدمين النشطين',
+            AppLocalizations.of(context)!.activeUsers,
             '152',
             Icons.people,
             AppColors.primaryLight,
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         Expanded(
           child: _buildQuickStatCard(
             'الإدارات',
@@ -1067,13 +1231,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               Text(
                 value,
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  color: AppColors.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: AppColors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             title,
             style: Theme.of(
@@ -1177,29 +1341,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             value,
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              color: AppColors.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: AppColors.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             title,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: AppColors.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             subtitle,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),
@@ -1228,15 +1392,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               Text(
                 'إحصائيات الأداء',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppColors.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: AppColors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const Spacer(),
               ElevatedButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.analytics),
-                label: const Text('عرض التفاصيل'),
+                label: Text('عرض التفاصيل'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryDark,
                   foregroundColor: Colors.white,
@@ -1247,7 +1411,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Container(
             height: 200,
             decoration: BoxDecoration(
@@ -1282,7 +1446,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             () {},
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         Expanded(
           child: _buildActionCard(
             'إدارة المستخدمين',
@@ -1292,7 +1456,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             () {},
           ),
         ),
-        const SizedBox(width: 16),
+        SizedBox(width: 16),
         Expanded(
           child: _buildActionCard(
             'التقارير',
@@ -1341,20 +1505,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
               child: Icon(icon, color: color, size: 24),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
               title,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: AppColors.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.onSurfaceVariant,
-              ),
+                    color: AppColors.onSurfaceVariant,
+                  ),
             ),
           ],
         ),
@@ -1384,15 +1548,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           children: [
             // Header Section
             _buildQuickReviewHeader(pendingAchievements.length),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Quick Stats Section
             _buildQuickReviewStats(pendingAchievements),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Filter and Sort Options
             _buildQuickReviewFilters(),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Pending Achievements Content
             if (pendingAchievements.isEmpty)
@@ -1432,16 +1596,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Text(
                   'المراجعة السريعة',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   'مراجعة سريعة للمنجزات المعلقة ($pendingCount منجز)',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
                 ),
               ],
             ),
@@ -1461,7 +1625,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   size: 28,
                 ),
                 if (pendingCount > 0) ...[
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -1501,10 +1665,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       return daysDiff <= 7;
     }).length;
 
-    final departments = pendingAchievements
-        .map((a) => a.executiveDepartment)
-        .toSet()
-        .length;
+    final departments =
+        pendingAchievements.map((a) => a.executiveDepartment).toSet().length;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1522,7 +1684,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   Colors.red,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: _buildQuickStatCard(
                   'هذا الأسبوع',
@@ -1531,7 +1693,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   warningColor,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: _buildQuickStatCard(
                   'الإدارات',
@@ -1540,7 +1702,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   AppColors.primaryMedium,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: _buildQuickStatCard(
                   'الإجمالي',
@@ -1564,7 +1726,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       Colors.red,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Expanded(
                     child: _buildQuickStatCard(
                       'هذا الأسبوع',
@@ -1575,7 +1737,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -1586,7 +1748,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       AppColors.primaryMedium,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Expanded(
                     child: _buildQuickStatCard(
                       'الإجمالي',
@@ -1608,21 +1770,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Icons.priority_high,
                 Colors.red,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildQuickStatCard(
                 'هذا الأسبوع',
                 '$thisWeek',
                 Icons.today,
                 warningColor,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildQuickStatCard(
                 'الإدارات',
                 '$departments',
                 Icons.business,
                 AppColors.primaryMedium,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               _buildQuickStatCard(
                 'الإجمالي',
                 '${pendingAchievements.length}',
@@ -1638,6 +1800,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   String _quickReviewSortBy = 'date';
   bool _showUrgentOnly = false;
+
+  // Analytics variables
+  String _selectedReportPeriod = 'weekly';
+  bool _isAnalyticsLoading = false;
+  Map<String, dynamic>? _currentAnalyticsData;
+
+  // Settings variables
+  String _selectedSettingsTab = 'general';
+  bool _emailNotificationsEnabled = true;
+  bool _pushNotificationsEnabled = true;
+  bool _achievementAutoApproval = false;
+  bool _maintenanceModeEnabled = false;
+  bool _backupEnabled = true;
+  String _backupFrequency = 'daily';
+  int _maxFileSize = 10; // MB
+  int _sessionTimeout = 30; // minutes
+  bool _twoFactorEnabled = false;
+  bool _auditLogEnabled = true;
+  String _defaultUserRole = 'user';
+  Map<String, bool> _modulePermissions = {
+    'achievements': true,
+    'users': true,
+    'analytics': true,
+    'reports': true,
+    'settings': true,
+  };
 
   Widget _buildQuickReviewFilters() {
     return Container(
@@ -1659,12 +1847,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             return Row(
               children: [
                 const Icon(Icons.tune, color: AppColors.primaryDark),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Text(
                   'فلترة سريعة',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const Spacer(),
                 Row(
@@ -1672,11 +1860,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     _buildFilterChipWidget('الكل', !_showUrgentOnly, () {
                       setState(() => _showUrgentOnly = false);
                     }),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _buildFilterChipWidget('العاجل فقط', _showUrgentOnly, () {
                       setState(() => _showUrgentOnly = true);
                     }),
-                    const SizedBox(width: 20),
+                    SizedBox(width: 20),
                     SizedBox(
                       width: 150,
                       child: DropdownButtonFormField<String>(
@@ -1719,28 +1907,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Row(
                   children: [
                     const Icon(Icons.tune, color: AppColors.primaryDark),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Text(
                       'فلترة سريعة',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Row(
                   children: [
                     _buildFilterChipWidget('الكل', !_showUrgentOnly, () {
                       setState(() => _showUrgentOnly = false);
                     }),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     _buildFilterChipWidget('العاجل فقط', _showUrgentOnly, () {
                       setState(() => _showUrgentOnly = true);
                     }),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: DropdownButtonFormField<String>(
@@ -1837,15 +2025,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               color: successColor,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Text(
             'لا توجد منجزات معلقة!',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: AppColors.onSurface,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: AppColors.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             'جميع المنجزات تم مراجعتها بنجاح',
             style: Theme.of(
@@ -1853,11 +2041,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             ).textTheme.bodyLarge?.copyWith(color: AppColors.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => setState(() => _selectedSidebarIndex = 2),
             icon: const Icon(Icons.assignment),
-            label: const Text('عرض جميع المنجزات'),
+            label: Text('عرض جميع المنجزات'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryDark,
               foregroundColor: Colors.white,
@@ -1970,8 +2158,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     final priorityColor = isUrgent
         ? Colors.red
         : daysDiff >= 1
-        ? warningColor
-        : successColor;
+            ? warningColor
+            : successColor;
 
     if (isMobile) {
       return Container(
@@ -2006,8 +2194,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     isUrgent
                         ? 'عاجل'
                         : daysDiff >= 1
-                        ? 'متوسط'
-                        : 'جديد',
+                            ? 'متوسط'
+                            : 'جديد',
                     style: TextStyle(
                       color: priorityColor,
                       fontWeight: FontWeight.bold,
@@ -2019,12 +2207,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Text(
                   _formatDate(achievement.createdAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                        color: AppColors.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(
               achievement.topic,
               style: Theme.of(
@@ -2033,31 +2221,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               achievement.goal,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurfaceVariant,
-              ),
+                    color: AppColors.onSurfaceVariant,
+                  ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               achievement.executiveDepartment,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.primaryDark,
-                fontWeight: FontWeight.w500,
-              ),
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () => _approveAchievement(achievement.id ?? ''),
                     icon: const Icon(Icons.check, size: 18),
-                    label: const Text('موافق'),
+                    label: Text('موافق'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: successColor,
                       foregroundColor: Colors.white,
@@ -2068,12 +2256,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _rejectAchievement(achievement.id ?? ''),
                     icon: const Icon(Icons.close, size: 18),
-                    label: const Text('رفض'),
+                    label: Text('رفض'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: errorColor,
                       side: BorderSide(color: errorColor),
@@ -2123,7 +2311,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2132,8 +2320,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       isUrgent
                           ? 'عاجل'
                           : daysDiff >= 1
-                          ? 'متوسط الأولوية'
-                          : 'جديد',
+                              ? 'متوسط الأولوية'
+                              : 'جديد',
                       style: TextStyle(
                         color: priorityColor,
                         fontWeight: FontWeight.bold,
@@ -2141,10 +2329,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       ),
                     ),
                     Text(
-                      daysDiff == 0 ? 'اليوم' : '$daysDiff ${daysDiff == 1 ? 'يوم' : 'أيام'} مضت',
+                      daysDiff == 0
+                          ? 'اليوم'
+                          : '$daysDiff ${daysDiff == 1 ? 'يوم' : 'أيام'} مضت',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                      ),
+                            color: AppColors.onSurfaceVariant,
+                          ),
                     ),
                   ],
                 ),
@@ -2152,12 +2342,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               Text(
                 _formatDate(achievement.createdAt),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                ),
+                      color: AppColors.onSurfaceVariant,
+                    ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             achievement.topic,
             style: Theme.of(
@@ -2166,7 +2356,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             achievement.goal,
             style: Theme.of(
@@ -2175,7 +2365,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             maxLines: isDesktop ? 3 : 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -2185,19 +2375,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             child: Text(
               achievement.executiveDepartment,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.primaryDark,
-                fontWeight: FontWeight.w500,
-              ),
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () => _approveAchievement(achievement.id ?? ''),
                   icon: const Icon(Icons.check),
-                  label: const Text('موافقة'),
+                  label: Text('موافقة'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: successColor,
                     foregroundColor: Colors.white,
@@ -2208,12 +2398,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _rejectAchievement(achievement.id ?? ''),
                   icon: const Icon(Icons.close),
-                  label: const Text('رفض'),
+                  label: Text('رفض'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: errorColor,
                     side: BorderSide(color: errorColor),
@@ -2225,13 +2415,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 ),
               ),
               if (isDesktop) ...[
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 IconButton(
                   onPressed: () => _showAchievementDetails(achievement),
                   icon: const Icon(Icons.info_outline),
                   tooltip: 'عرض التفاصيل',
                   style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primaryLight.withValues(alpha: 0.1),
+                    backgroundColor:
+                        AppColors.primaryLight.withValues(alpha: 0.1),
                     foregroundColor: AppColors.primaryDark,
                   ),
                 ),
@@ -2276,7 +2467,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   Expanded(
                     child: Text(
                       'تفاصيل المنجز',
-                      style: Theme.of(context).textTheme.headlineSmall
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -2287,7 +2480,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               _buildDetailRow('الموضوع:', achievement.topic),
               _buildDetailRow('الهدف:', achievement.goal),
               _buildDetailRow('الإدارة:', achievement.executiveDepartment),
@@ -2297,7 +2490,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
               if (achievement.reviewNotes?.isNotEmpty == true)
                 _buildDetailRow('ملاحظات المراجعة:', achievement.reviewNotes!),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Row(
                 children: [
                   Expanded(
@@ -2307,14 +2500,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         _approveAchievement(achievement.id ?? '');
                       },
                       icon: const Icon(Icons.check),
-                      label: const Text('موافقة'),
+                      label: Text('موافقة'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: successColor,
                         foregroundColor: Colors.white,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
@@ -2322,7 +2515,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                         _rejectAchievement(achievement.id ?? '');
                       },
                       icon: const Icon(Icons.close),
-                      label: const Text('رفض'),
+                      label: Text('رفض'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: errorColor,
                         side: BorderSide(color: errorColor),
@@ -2349,9 +2542,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryDark,
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryDark,
+                  ),
             ),
           ),
           Expanded(
@@ -2383,15 +2576,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           children: [
             // Header Section with Search and Filters
             _buildAchievementsHeader(achievements.length),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Search and Filter Section
             _buildSearchAndFilterSection(),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Statistics Cards
             _buildAchievementsStatistics(achievements),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             // Achievements Table/Grid
             _buildAchievementsTable(achievements),
@@ -2428,16 +2621,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Text(
                   'إدارة المنجزات',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   'إدارة شاملة لجميع المنجزات في النظام ($totalCount منجز)',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
                 ),
               ],
             ),
@@ -2452,7 +2645,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.assignment, color: Colors.white, size: 24),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert, color: Colors.white),
                   onSelected: (value) {
@@ -2535,14 +2728,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Row(
             children: [
               const Icon(Icons.search, color: AppColors.primaryDark),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'البحث والفلترة المتقدمة',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.primaryDark,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: AppColors.primaryDark,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
               // Quick actions
@@ -2555,7 +2748,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       setState(() => _selectedStatusFilter = 'all');
                     },
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   _buildQuickFilterChip(
                     'معلقة',
                     _selectedStatusFilter == 'pending',
@@ -2563,7 +2756,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                       setState(() => _selectedStatusFilter = 'pending');
                     },
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   _buildQuickFilterChip(
                     'معتمدة',
                     _selectedStatusFilter == 'approved',
@@ -2575,7 +2768,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
 
           // Search Bar with advanced options
           Row(
@@ -2618,11 +2811,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               ElevatedButton.icon(
                 onPressed: () => _showAdvancedFilters(),
                 icon: const Icon(Icons.tune),
-                label: const Text('فلاتر متقدمة'),
+                label: Text('فلاتر متقدمة'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryDark,
                   foregroundColor: Colors.white,
@@ -2633,7 +2826,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
           // Filter Row
           Wrap(
@@ -2731,7 +2924,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 OutlinedButton.icon(
                   onPressed: () => _clearFilters(),
                   icon: const Icon(Icons.clear_all),
-                  label: const Text('مسح جميع الفلاتر'),
+                  label: Text('مسح جميع الفلاتر'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: errorColor,
                     side: BorderSide(color: errorColor),
@@ -2745,7 +2938,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
           // Active filters display
           if (_hasActiveFilters()) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -2849,7 +3042,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       decoration: BoxDecoration(
         color: AppColors.primaryLight.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
+        border:
+            Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2858,7 +3052,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             label,
             style: const TextStyle(color: AppColors.primaryDark, fontSize: 12),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           GestureDetector(
             onTap: onRemove,
             child: Icon(
@@ -2924,14 +3118,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             Row(
               children: [
                 const Icon(Icons.tune, color: AppColors.primaryDark),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'الفلاتر المتقدمة',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                   ),
                 ),
                 IconButton(
@@ -2941,53 +3135,49 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ],
             ),
             const Divider(),
-            const SizedBox(height: 16),
-
+            SizedBox(height: 16),
             Text(
               'فلترة حسب نوع المشاركة:',
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 12),
-
+            SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children:
-                  [
-                        'مبادرة',
-                        'تدشين',
-                        'مشاركة',
-                        'فعالية',
-                        'حملة',
-                        'لقاء',
-                        'محاضرة',
-                        'دورة تدريبية',
-                        'اجتماع',
-                      ]
-                      .map(
-                        (type) => FilterChip(
-                          label: Text(type),
-                          selected: false, // You can implement this logic
-                          onSelected: (selected) {
-                            // Implement participation type filtering
-                          },
-                        ),
-                      )
-                      .toList(),
+              children: [
+                'مبادرة',
+                'تدشين',
+                'مشاركة',
+                'فعالية',
+                'حملة',
+                'لقاء',
+                'محاضرة',
+                'دورة تدريبية',
+                'اجتماع',
+              ]
+                  .map(
+                    (type) => FilterChip(
+                      label: Text(type),
+                      selected: false, // You can implement this logic
+                      onSelected: (selected) {
+                        // Implement participation type filtering
+                      },
+                    ),
+                  )
+                  .toList(),
             ),
-
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('إلغاء'),
+                    child: Text('إلغاء'),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -2997,7 +3187,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryDark,
                     ),
-                    child: const Text(
+                    child: Text(
                       'تطبيق',
                       style: TextStyle(color: Colors.white),
                     ),
@@ -3030,7 +3220,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 AppColors.primaryDark,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: _buildStatCard(
                 'معلقة',
@@ -3039,7 +3229,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 warningColor,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: _buildStatCard(
                 'معتمد',
@@ -3048,7 +3238,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 successColor,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: _buildStatCard(
                 'مرفوض',
@@ -3059,7 +3249,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
 
         // Additional analytics row
         if (_isDesktop()) ...[
@@ -3075,7 +3265,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   successColor,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: _buildProgressCard(
                   'معدل الرفض',
@@ -3086,7 +3276,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   errorColor,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: _buildProgressCard(
                   'معلقة',
@@ -3097,7 +3287,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   warningColor,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(child: _buildDepartmentStatsCard(achievements)),
             ],
           ),
@@ -3132,25 +3322,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Row(
             children: [
               Icon(Icons.trending_up, color: color, size: 20),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppColors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             percentage,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           LinearProgressIndicator(
             value: progress,
             backgroundColor: color.withValues(alpha: 0.1),
@@ -3177,7 +3367,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.2)),
+        border:
+            Border.all(color: AppColors.primaryLight.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),
@@ -3192,21 +3383,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
           Row(
             children: [
               Icon(Icons.business, color: AppColors.primaryDark, size: 20),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
-                'الإدارات الأكثر نشاطاً',
+                AppLocalizations.of(context)!.mostActiveDepartments,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppColors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           if (topDepartments.isNotEmpty) ...[
-            ...topDepartments
-                .take(3)
-                .map(
+            ...topDepartments.take(3).map(
                   (entry) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Row(
@@ -3219,11 +3408,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             entry.key,
-                            style: Theme.of(context).textTheme.bodySmall
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
                                 ?.copyWith(color: AppColors.onSurface),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -3235,16 +3426,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryLight.withValues(alpha: 0.1),
+                            color:
+                                AppColors.primaryLight.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             entry.value.toString(),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: AppColors.primaryDark,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.primaryDark,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                           ),
                         ),
                       ],
@@ -3255,8 +3447,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             Text(
               'لا توجد بيانات',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.onSurfaceVariant,
-              ),
+                    color: AppColors.onSurfaceVariant,
+                  ),
             ),
           ],
         ],
@@ -3294,15 +3486,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             ),
             child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             value,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             title,
             style: Theme.of(
@@ -3358,8 +3550,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               children: [
                 // Select all checkbox
                 Checkbox(
-                  value:
-                      _selectedAchievements.length ==
+                  value: _selectedAchievements.length ==
                           filteredAchievements.length &&
                       filteredAchievements.isNotEmpty,
                   onChanged: (value) {
@@ -3377,15 +3568,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   },
                   activeColor: AppColors.primaryDark,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(
                   flex: 3,
                   child: Text(
                     'الموضوع',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                   ),
                 ),
                 Expanded(
@@ -3393,9 +3584,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   child: Text(
                     'الإدارة',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                   ),
                 ),
                 Expanded(
@@ -3403,9 +3594,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   child: Text(
                     'التاريخ',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                   ),
                 ),
                 Expanded(
@@ -3413,9 +3604,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   child: Text(
                     'الحالة',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -3424,9 +3615,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   child: Text(
                     'الإجراءات',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryDark,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -3464,13 +3655,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       child: Row(
         children: [
           Icon(Icons.check_circle, color: AppColors.primaryDark, size: 20),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text(
             'تم تحديد ${_selectedAchievements.length} منجز',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.primaryDark,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: AppColors.primaryDark,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const Spacer(),
           Row(
@@ -3478,7 +3669,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               ElevatedButton.icon(
                 onPressed: () => _bulkApprove(),
                 icon: const Icon(Icons.check, size: 16),
-                label: const Text('اعتماد الكل'),
+                label: Text('اعتماد الكل'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: successColor,
                   foregroundColor: Colors.white,
@@ -3489,11 +3680,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => _bulkReject(),
                 icon: const Icon(Icons.close, size: 16),
-                label: const Text('رفض الكل'),
+                label: Text('رفض الكل'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: errorColor,
                   foregroundColor: Colors.white,
@@ -3504,11 +3695,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => _bulkDelete(),
                 icon: const Icon(Icons.delete, size: 16),
-                label: const Text('حذف الكل'),
+                label: Text('حذف الكل'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red[700],
                   foregroundColor: Colors.white,
@@ -3519,7 +3710,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               OutlinedButton(
                 onPressed: () {
                   setState(() {
@@ -3535,7 +3726,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     vertical: 6,
                   ),
                 ),
-                child: const Text('إلغاء التحديد'),
+                child: Text('إلغاء التحديد'),
               ),
             ],
           ),
@@ -3571,7 +3762,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             },
             activeColor: AppColors.primaryDark,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
 
           // Topic
           Expanded(
@@ -3582,18 +3773,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Text(
                   achievement.topic,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.onSurface,
-                  ),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.onSurface,
+                      ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   achievement.goal,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                        color: AppColors.onSurfaceVariant,
+                      ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -3645,7 +3836,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     onPressed: () =>
                         _approveAchievementWithConfirmation(achievement),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   _buildActionButton(
                     icon: Icons.close,
                     color: errorColor,
@@ -3653,7 +3844,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     onPressed: () =>
                         _rejectAchievementWithConfirmation(achievement),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                 ],
                 _buildActionButton(
                   icon: Icons.visibility,
@@ -3661,14 +3852,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   tooltip: 'عرض',
                   onPressed: () => _viewAchievementDetails(achievement),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 _buildActionButton(
                   icon: Icons.edit,
                   color: AppColors.primaryMedium,
                   tooltip: 'تعديل',
                   onPressed: () => _editAchievement(achievement),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 _buildActionButton(
                   icon: Icons.delete,
                   color: errorColor,
@@ -3691,14 +3882,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الاعتماد المجمع'),
+        title: Text('تأكيد الاعتماد المجمع'),
         content: Text(
           'هل أنت متأكد من اعتماد ${_selectedAchievements.length} منجز؟',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -3706,7 +3897,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               await _performBulkAction('approved');
             },
             style: ElevatedButton.styleFrom(backgroundColor: successColor),
-            child: const Text(
+            child: Text(
               'اعتماد الكل',
               style: TextStyle(color: Colors.white),
             ),
@@ -3722,14 +3913,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الرفض المجمع'),
+        title: Text('تأكيد الرفض المجمع'),
         content: Text(
           'هل أنت متأكد من رفض ${_selectedAchievements.length} منجز؟',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -3737,7 +3928,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               await _performBulkAction('rejected');
             },
             style: ElevatedButton.styleFrom(backgroundColor: errorColor),
-            child: const Text(
+            child: Text(
               'رفض الكل',
               style: TextStyle(color: Colors.white),
             ),
@@ -3753,13 +3944,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الحذف المجمع'),
+        title: Text('تأكيد الحذف المجمع'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('هل أنت متأكد من حذف ${_selectedAchievements.length} منجز؟'),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -3767,7 +3958,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: errorColor.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.warning, color: errorColor, size: 20),
                   SizedBox(width: 8),
@@ -3789,7 +3980,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -3797,7 +3988,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               await _performBulkDelete();
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red[700]),
-            child: const Text(
+            child: Text(
               'حذف نهائياً',
               style: TextStyle(color: Colors.white),
             ),
@@ -3911,7 +4102,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: color),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(
@@ -3972,19 +4163,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             size: 64,
             color: AppColors.onSurfaceVariant.withValues(alpha: 0.5),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             'لا توجد منجزات تطابق البحث',
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(color: AppColors.onSurfaceVariant),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             'جرب تغيير معايير البحث أو الفلترة',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
+                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
           ),
         ],
       ),
@@ -4012,14 +4203,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             size: 64,
             color: errorColor.withValues(alpha: 0.7),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             'حدث خطأ',
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(color: errorColor),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             message,
             style: Theme.of(
@@ -4027,11 +4218,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             ).textTheme.bodyMedium?.copyWith(color: AppColors.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           ElevatedButton.icon(
             onPressed: () => setState(() {}),
             icon: const Icon(Icons.refresh),
-            label: const Text('إعادة المحاولة'),
+            label: Text('إعادة المحاولة'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryDark,
               foregroundColor: Colors.white,
@@ -4051,8 +4242,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         if (!achievement.topic.toLowerCase().contains(searchLower) &&
             !achievement.goal.toLowerCase().contains(searchLower) &&
             !achievement.executiveDepartment.toLowerCase().contains(
-              searchLower,
-            )) {
+                  searchLower,
+                )) {
           return false;
         }
       }
@@ -4124,12 +4315,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الاعتماد'),
+        title: Text('تأكيد الاعتماد'),
         content: Text('هل أنت متأكد من اعتماد منجز "${achievement.topic}"؟'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -4137,7 +4328,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               _approveAchievement(achievement.id!);
             },
             style: ElevatedButton.styleFrom(backgroundColor: successColor),
-            child: const Text('اعتماد', style: TextStyle(color: Colors.white)),
+            child: Text('اعتماد', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -4148,12 +4339,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الرفض'),
+        title: Text('تأكيد الرفض'),
         content: Text('هل أنت متأكد من رفض منجز "${achievement.topic}"؟'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -4161,7 +4352,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               _rejectAchievement(achievement.id!);
             },
             style: ElevatedButton.styleFrom(backgroundColor: errorColor),
-            child: const Text('رفض', style: TextStyle(color: Colors.white)),
+            child: Text('رفض', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -4172,13 +4363,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('تأكيد الحذف'),
+        title: Text('تأكيد الحذف'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('هل أنت متأكد من حذف منجز "${achievement.topic}"؟'),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -4186,7 +4377,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: errorColor.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.warning, color: errorColor, size: 20),
                   SizedBox(width: 8),
@@ -4208,7 +4399,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text('إلغاء'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -4216,7 +4407,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               _deleteAchievement(achievement.id!);
             },
             style: ElevatedButton.styleFrom(backgroundColor: errorColor),
-            child: const Text(
+            child: Text(
               'حذف نهائياً',
               style: TextStyle(color: Colors.white),
             ),
@@ -4261,11 +4452,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                   Expanded(
                     child: Text(
                       'تفاصيل المنجز',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primaryDark,
+                              ),
                     ),
                   ),
                   IconButton(
@@ -4275,8 +4466,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
-
+              SizedBox(height: 16),
               _buildDetailRow('الموضوع:', achievement.topic),
               _buildDetailRow('الهدف:', achievement.goal),
               _buildDetailRow('نوع المشاركة:', achievement.participationType),
@@ -4291,8 +4481,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               _buildDetailRow('المدة:', achievement.duration),
               _buildDetailRow('الأثر:', achievement.impact),
               _buildDetailRow('الحالة:', _getStatusText(achievement.status)),
-
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Row(
                 children: [
                   if (achievement.status == 'pending') ...[
@@ -4303,14 +4492,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                           _approveAchievementWithConfirmation(achievement);
                         },
                         icon: const Icon(Icons.check),
-                        label: const Text('اعتماد'),
+                        label: Text('اعتماد'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: successColor,
                           foregroundColor: Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
@@ -4318,7 +4507,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                           _rejectAchievementWithConfirmation(achievement);
                         },
                         icon: const Icon(Icons.close),
-                        label: const Text('رفض'),
+                        label: Text('رفض'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: errorColor,
                           foregroundColor: Colors.white,
@@ -4333,7 +4522,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                           _editAchievement(achievement);
                         },
                         icon: const Icon(Icons.edit),
-                        label: const Text('تعديل'),
+                        label: Text('تعديل'),
                       ),
                     ),
                   ],
@@ -4395,25 +4584,2402 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   }
 
   Widget _buildAnalyticsContent() {
+    return AnimatedBuilder(
+      animation: _fadeAnimation,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Section
+                _buildAnalyticsHeader(),
+                SizedBox(height: 24),
+
+                // Period Selection Tabs
+                _buildPeriodSelector(),
+                SizedBox(height: 24),
+
+                // Analytics Content
+                _isAnalyticsLoading
+                    ? _buildLoadingAnalytics()
+                    : _buildAnalyticsData(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAnalyticsHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryDark,
+            AppColors.primaryMedium,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryDark.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'التقارير والتحليلات',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'تحليلات شاملة ومفصلة لأداء النظام',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.analytics,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPeriodSelector() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.date_range, color: AppColors.primaryDark),
+              SizedBox(width: 12),
+              Text(
+                'اختر فترة التقرير',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const Spacer(),
+              _buildExportButton(),
+            ],
+          ),
+          SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 768) {
+                return Row(
+                  children: [
+                    Expanded(
+                        child: _buildPeriodTab('weekly', 'التقرير الأسبوعي')),
+                    SizedBox(width: 16),
+                    Expanded(
+                        child: _buildPeriodTab('monthly', 'التقرير الشهري')),
+                    SizedBox(width: 16),
+                    Expanded(
+                        child: _buildPeriodTab('yearly', 'التقرير السنوي')),
+                  ],
+                );
+              } else {
+                return Column(
+                  children: [
+                    _buildPeriodTab('weekly', 'التقرير الأسبوعي'),
+                    SizedBox(height: 12),
+                    _buildPeriodTab('monthly', 'التقرير الشهري'),
+                    SizedBox(height: 12),
+                    _buildPeriodTab('yearly', 'التقرير السنوي'),
+                  ],
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPeriodTab(String period, String title) {
+    final isSelected = _selectedReportPeriod == period;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _onPeriodSelected(period),
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryDark : AppColors.surfaceLight,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primaryDark
+                  : AppColors.primaryLight.withValues(alpha: 0.3),
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: isSelected ? Colors.white : AppColors.onSurface,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportButton() {
+    return ElevatedButton.icon(
+      onPressed: _currentAnalyticsData != null ? _exportReport : null,
+      icon: const Icon(Icons.download),
+      label: Text('تصدير التقرير'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingAnalytics() {
+    return Container(
+      height: 400,
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              'جارٍ تحميل التحليلات...',
+              style: TextStyle(
+                fontSize: 16,
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsData() {
+    if (_currentAnalyticsData == null) {
+      return _buildEmptyAnalyticsState();
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 1024) {
+          return _buildDesktopAnalytics();
+        } else if (constraints.maxWidth > 768) {
+          return _buildTabletAnalytics();
+        } else {
+          return _buildMobileAnalytics();
+        }
+      },
+    );
+  }
+
+  Widget _buildEmptyAnalyticsState() {
+    return Container(
+      height: 400,
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.analytics_outlined,
+              size: 64,
+              color: AppColors.primaryDark,
+            ),
+          ),
+          SizedBox(height: 24),
+          Text(
+            'اختر فترة التقرير لعرض التحليلات',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: AppColors.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            'حدد الفترة الزمنية المطلوبة من الأعلى لعرض التحليلات والإحصائيات المفصلة',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopAnalytics() {
+    return Column(
+      children: [
+        // Summary Cards Row
+        _buildSummaryCards(),
+        SizedBox(height: 24),
+
+        // Primary Analytics Section - Line Chart and Pie Chart
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left Column - Line Chart (main trend)
+            Expanded(
+              flex: 1,
+              child: _buildLineChartSection(),
+            ),
+            SizedBox(width: 24),
+            // Right Column - Pie Chart (status distribution)
+            Expanded(
+              flex: 1,
+              child: _buildPieChartSection(),
+            ),
+          ],
+        ),
+        SizedBox(height: 24),
+
+        // Secondary Charts Section
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left Column - Area Chart and Bar Chart
+            Expanded(
+              child: Column(
+                children: [
+                  _buildAreaChartSection(),
+                  SizedBox(height: 24),
+                  _buildBarChartSection(),
+                ],
+              ),
+            ),
+            SizedBox(width: 24),
+            // Right Column - Radar Chart and Scatter Plot
+            Expanded(
+              child: Column(
+                children: [
+                  _buildRadarChartSection(),
+                  SizedBox(height: 24),
+                  _buildScatterPlotSection(),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 24),
+
+        // Advanced Analytics Section
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left Column - Heat Map
+            Expanded(
+              child: _buildHeatMapSection(),
+            ),
+            SizedBox(width: 24),
+            // Right Column - Radial Progress
+            Expanded(
+              child: _buildRadialProgressSection(),
+            ),
+          ],
+        ),
+        SizedBox(height: 24),
+
+        // Performance Metrics Section
+        _buildPerformanceMetricsSection(),
+        SizedBox(height: 24),
+
+        // Detailed Stats Section
+        _buildDetailedStats(),
+      ],
+    );
+  }
+
+  Widget _buildTabletAnalytics() {
+    return Column(
+      children: [
+        _buildSummaryCards(),
+        SizedBox(height: 24),
+
+        // Primary Charts Row - Most Important
+        Row(
+          children: [
+            Expanded(child: _buildLineChartSection()),
+            SizedBox(width: 16),
+            Expanded(child: _buildPieChartSection()),
+          ],
+        ),
+        SizedBox(height: 24),
+
+        // Secondary Charts
+        _buildAreaChartSection(),
+        SizedBox(height: 24),
+
+        Row(
+          children: [
+            Expanded(child: _buildBarChartSection()),
+            SizedBox(width: 16),
+            Expanded(child: _buildRadarChartSection()),
+          ],
+        ),
+        SizedBox(height: 24),
+
+        Row(
+          children: [
+            Expanded(child: _buildScatterPlotSection()),
+            SizedBox(width: 16),
+            Expanded(child: _buildHeatMapSection()),
+          ],
+        ),
+        SizedBox(height: 24),
+
+        _buildRadialProgressSection(),
+        SizedBox(height: 24),
+        _buildPerformanceMetricsSection(),
+        SizedBox(height: 24),
+        _buildDetailedStats(),
+      ],
+    );
+  }
+
+  Widget _buildMobileAnalytics() {
+    return Column(
+      children: [
+        _buildSummaryCards(),
+        SizedBox(height: 24),
+
+        // Primary Analytics - Most Important First
+        _buildLineChartSection(),
+        SizedBox(height: 24),
+        _buildPieChartSection(), // Status distribution - high priority
+        SizedBox(height: 24),
+
+        // Secondary Analytics
+        _buildAreaChartSection(),
+        SizedBox(height: 24),
+        _buildBarChartSection(),
+        SizedBox(height: 24),
+        _buildRadarChartSection(),
+        SizedBox(height: 24),
+
+        // Advanced Analytics
+        _buildScatterPlotSection(),
+        SizedBox(height: 24),
+        _buildHeatMapSection(),
+        SizedBox(height: 24),
+        _buildRadialProgressSection(),
+        SizedBox(height: 24),
+        _buildPerformanceMetricsSection(),
+        SizedBox(height: 24),
+        _buildDetailedStats(),
+      ],
+    );
+  }
+
+  Widget _buildSummaryCards() {
+    final data = _currentAnalyticsData!;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 768) {
+          return Row(
+            children: [
+              Expanded(
+                  child: _buildSummaryCard(
+                      'إجمالي المنجزات',
+                      '${data['totalAchievements']}',
+                      Icons.assignment,
+                      AppColors.primaryDark)),
+              SizedBox(width: 16),
+              Expanded(
+                  child: _buildSummaryCard('المعتمد', '${data['approved']}',
+                      Icons.check_circle, const Color(0xFF4CAF50))),
+              SizedBox(width: 16),
+              Expanded(
+                  child: _buildSummaryCard('المعلق', '${data['pending']}',
+                      Icons.pending, const Color(0xFFFF9800))),
+              SizedBox(width: 16),
+              Expanded(
+                  child: _buildSummaryCard('المرفوض', '${data['rejected']}',
+                      Icons.cancel, const Color(0xFFF44336))),
+            ],
+          );
+        } else {
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                      child: _buildSummaryCard(
+                          'إجمالي المنجزات',
+                          '${data['totalAchievements']}',
+                          Icons.assignment,
+                          AppColors.primaryDark)),
+                  SizedBox(width: 16),
+                  Expanded(
+                      child: _buildSummaryCard('المعتمد', '${data['approved']}',
+                          Icons.check_circle, const Color(0xFF4CAF50))),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                      child: _buildSummaryCard('المعلق', '${data['pending']}',
+                          Icons.pending, const Color(0xFFFF9800))),
+                  SizedBox(width: 16),
+                  Expanded(
+                      child: _buildSummaryCard('المرفوض', '${data['rejected']}',
+                          Icons.cancel, const Color(0xFFF44336))),
+                ],
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildSummaryCard(
+      String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const Spacer(),
+              Text(
+                value,
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: AppColors.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLineChartSection() {
+    return ChartsWidget.buildLineChart(
+      data: _currentAnalyticsData!,
+      title: 'اتجاه المنجزات - ${_currentAnalyticsData!['period']}',
+      primaryColor: AppColors.primaryDark,
+      height: 350,
+    );
+  }
+
+  Widget _buildPieChartSection() {
+    return ChartsWidget.buildPieChart(
+      data: _currentAnalyticsData!,
+      title: 'توزيع حالات المنجزات',
+      height: 350,
+    );
+  }
+
+  Widget _buildBarChartSection() {
+    return ChartsWidget.buildBarChart(
+      data: _currentAnalyticsData!,
+      title: 'المنجزات حسب الإدارة',
+      primaryColor: AppColors.primaryMedium,
+      height: 350,
+    );
+  }
+
+  // رسم بياني منطقة (Area Chart)
+  Widget _buildAreaChartSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.area_chart,
+                  color: AppColors.primaryLight,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'منحنى تراكمي للمنجزات',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'تراكمي',
+                  style: TextStyle(
+                    color: AppColors.primaryLight,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            height: 280,
+            child: CustomPaint(
+              painter: AreaChartPainter(_currentAnalyticsData!),
+              child: Container(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // رسم بياني رادار (Radar Chart)
+  Widget _buildRadarChartSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.radar,
+                  color: Colors.blue,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'أداء الإدارات',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'رادار',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            height: 280,
+            child: CustomPaint(
+              painter: RadarChartPainter(_currentAnalyticsData!),
+              child: Container(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // رسم بياني التشتت (Scatter Plot)
+  Widget _buildScatterPlotSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.scatter_plot,
+                  color: Colors.orange,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'العلاقة بين الوقت والمنجزات',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'تشتت',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            height: 280,
+            child: CustomPaint(
+              painter: ScatterPlotPainter(_currentAnalyticsData!),
+              child: Container(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // خريطة حرارية (Heat Map)
+  Widget _buildHeatMapSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.thermostat,
+                  color: Colors.red,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'خريطة حرارية للنشاط',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'حراري',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            height: 280,
+            child: _buildActivityHeatMap(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // تقدم دائري (Radial Progress)
+  Widget _buildRadialProgressSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.donut_small,
+                  color: Colors.purple,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'مؤشرات الأداء الرئيسية',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'KPI',
+                  style: TextStyle(
+                    color: Colors.purple,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            height: 280,
+            child: _buildRadialProgressIndicators(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // قسم مقاييس الأداء
+  Widget _buildPerformanceMetricsSection() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.speed,
+                  color: Colors.teal,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'مقاييس الأداء المتقدمة',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          _buildPerformanceMetricsGrid(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailedStats() {
+    final data = _currentAnalyticsData!;
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'إحصائيات تفصيلية',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppColors.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 20),
+          if (_selectedReportPeriod == 'monthly' &&
+              data['approvalRate'] != null)
+            _buildStatRow(
+                'معدل الاعتماد', '${data['approvalRate'].toStringAsFixed(1)}%'),
+          if (_selectedReportPeriod == 'yearly' && data['growthRate'] != null)
+            _buildStatRow('معدل النمو السنوي',
+                '${data['growthRate'].toStringAsFixed(1)}%'),
+          if (data['totalUsers'] != null)
+            _buildStatRow('إجمالي المستخدمين', '${data['totalUsers']}'),
+          if (data['activeUsers'] != null)
+            _buildStatRow(AppLocalizations.of(context)!.activeUsers,
+                '${data['activeUsers']}'),
+          _buildStatRow('الفترة الزمنية', data['period'] ?? ''),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: AppColors.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onPeriodSelected(String period) {
+    setState(() {
+      _selectedReportPeriod = period;
+      _isAnalyticsLoading = true;
+      _currentAnalyticsData = null;
+    });
+
+    _loadAnalyticsData(period);
+  }
+
+  Future<void> _loadAnalyticsData(String period) async {
+    try {
+      Map<String, dynamic> data;
+
+      switch (period) {
+        case 'weekly':
+          data = await _adminService.getWeeklyAnalytics();
+          break;
+        case 'monthly':
+          data = await _adminService.getMonthlyAnalytics();
+          break;
+        case 'yearly':
+          data = await _adminService.getYearlyAnalytics();
+          break;
+        default:
+          data = await _adminService.getWeeklyAnalytics();
+      }
+
+      if (mounted) {
+        setState(() {
+          _currentAnalyticsData = data;
+          _isAnalyticsLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isAnalyticsLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('خطأ في تحميل التحليلات: $e'),
+            backgroundColor: errorColor,
+          ),
+        );
+      }
+    }
+  }
+
+  void _exportReport() {
+    if (_currentAnalyticsData == null) return;
+
+    // في التطبيق الحقيقي، ستقوم بتصدير البيانات إلى Excel أو PDF
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('سيتم إضافة ميزة تصدير التقارير قريباً'),
+        backgroundColor: AppColors.primaryDark,
+      ),
+    );
+  }
+
+  // Settings Functions
+  void _saveAllSettings() {
+    // في التطبيق الحقيقي، ستقوم بحفظ الإعدادات في قاعدة البيانات
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('تم حفظ الإعدادات بنجاح'),
+        backgroundColor: successColor,
+      ),
+    );
+  }
+
+  Widget _buildGeneralSettings() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'الإعدادات العامة',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 24),
+
+          // Language Setting
+          _buildSettingItem(
+            title: 'اللغة',
+            subtitle: 'اختر لغة واجهة النظام',
+            icon: Icons.language,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 200),
+              child: const LanguageDropdown(
+                showFlags: true,
+              ),
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Theme Setting
+          _buildSettingItem(
+            title: 'المظهر',
+            subtitle: 'اختر نمط المظهر (يُطبق فوراً)',
+            icon: Icons.palette,
+            child: DropdownButton<String>(
+              value: GlobalThemeManager.currentThemeString,
+              onChanged: (value) async {
+                if (value != null) {
+                  await _changeTheme(value);
+                }
+              },
+              items: const [
+                DropdownMenuItem(value: 'light', child: Text('فاتح')),
+                DropdownMenuItem(value: 'dark', child: Text('داكن')),
+                DropdownMenuItem(value: 'system', child: Text('تلقائي')),
+              ],
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Session Timeout
+          _buildSettingItem(
+            title: 'مهلة انتهاء الجلسة',
+            subtitle: 'مدة البقاء في النظام بدون نشاط (بالدقائق)',
+            icon: Icons.timer,
+            child: SizedBox(
+              width: 100,
+              child: TextFormField(
+                initialValue: _sessionTimeout.toString(),
+                keyboardType: TextInputType.number,
+                onChanged: (value) =>
+                    _sessionTimeout = int.tryParse(value) ?? 30,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+              ),
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Default User Role
+          _buildSettingItem(
+            title: 'الدور الافتراضي للمستخدمين الجدد',
+            subtitle: 'الدور الذي يُعطى للمستخدمين الجدد تلقائياً',
+            icon: Icons.person_add,
+            child: DropdownButton<String>(
+              value: _defaultUserRole,
+              onChanged: (value) => setState(() => _defaultUserRole = value!),
+              items: const [
+                DropdownMenuItem(value: 'user', child: Text('مستخدم عادي')),
+                DropdownMenuItem(value: 'moderator', child: Text('مراقب')),
+                DropdownMenuItem(value: 'admin', child: Text('مدير')),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppearanceSettings() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'المظهر والواجهة',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 24),
+
+          // Theme Selection
+          _buildSettingItem(
+            title: 'نمط المظهر',
+            subtitle: 'اختر نمط العرض المفضل (يُطبق فوراً)',
+            icon: Icons.brightness_6,
+            child: DropdownButton<String>(
+              value: GlobalThemeManager.currentThemeString,
+              onChanged: (value) async {
+                if (value != null) {
+                  await _changeTheme(value);
+                }
+              },
+              items: const [
+                DropdownMenuItem(value: 'light', child: Text('فاتح')),
+                DropdownMenuItem(value: 'dark', child: Text('داكن')),
+                DropdownMenuItem(value: 'system', child: Text('تلقائي')),
+              ],
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Dark Mode Toggle
+          _buildSettingItem(
+            title: 'الوضع الليلي',
+            subtitle: 'تفعيل/إلغاء المظهر الداكن (تبديل سريع)',
+            icon: GlobalThemeManager.isDarkMode
+                ? Icons.dark_mode
+                : Icons.light_mode,
+            child: Switch(
+              value: GlobalThemeManager.isDarkMode,
+              onChanged: (value) async {
+                await _changeTheme(value ? 'dark' : 'light');
+              },
+              activeColor: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Language Section
+          Text(
+            'إعدادات اللغة',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryDark,
+                ),
+          ),
+          const SizedBox(height: 16),
+
+          // Language Toggle Widget
+          const LanguageToggleWidget(
+            showLabel: false,
+            padding: EdgeInsets.all(16),
+          ),
+
+          const Divider(height: 32),
+
+          // Current Theme Info
+          _buildSettingItem(
+            title: 'المظهر الحالي',
+            subtitle: 'النمط المُطبق حالياً',
+            icon: Icons.info_outline,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                GlobalThemeManager.currentThemeDisplayName,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Theme Colors Preview
+          _buildSettingItem(
+            title: 'ألوان النظام',
+            subtitle: 'معاينة الألوان المستخدمة في النظام',
+            icon: Icons.color_lens,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('الألوان الأساسية:',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildColorPreview(
+                        GlobalThemeManager.isDarkMode
+                            ? DarkColors.primaryDark
+                            : AppColors.primaryDark,
+                        'الأساسي'),
+                    SizedBox(width: 12),
+                    _buildColorPreview(
+                        GlobalThemeManager.isDarkMode
+                            ? DarkColors.primaryMedium
+                            : AppColors.primaryMedium,
+                        'المتوسط'),
+                    SizedBox(width: 12),
+                    _buildColorPreview(
+                        GlobalThemeManager.isDarkMode
+                            ? DarkColors.primaryLight
+                            : AppColors.primaryLight,
+                        'الفاتح'),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Text('ألوان السطح:',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildColorPreview(
+                        Theme.of(context).scaffoldBackgroundColor, 'الخلفية'),
+                    SizedBox(width: 12),
+                    _buildColorPreview(Theme.of(context).cardColor, 'البطاقات'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Font Settings
+          _buildSettingItem(
+            title: 'حجم الخط',
+            subtitle: 'تخصيص حجم الخط في النظام',
+            icon: Icons.text_fields,
+            child: DropdownButton<String>(
+              value: 'medium',
+              onChanged: (value) {
+                // يمكن إضافة وظيفة تغيير حجم الخط هنا
+              },
+              items: const [
+                DropdownMenuItem(value: 'small', child: Text('صغير')),
+                DropdownMenuItem(value: 'medium', child: Text('متوسط')),
+                DropdownMenuItem(value: 'large', child: Text('كبير')),
+              ],
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Quick Theme Actions
+          Text(
+            'تغيير سريع للمظهر',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await _changeTheme('light');
+                  },
+                  icon: const Icon(Icons.light_mode),
+                  label: Text('فاتح'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: !GlobalThemeManager.isDarkMode &&
+                            GlobalThemeManager.currentThemeString == 'light'
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await _changeTheme('dark');
+                  },
+                  icon: const Icon(Icons.dark_mode),
+                  label: Text('داكن'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GlobalThemeManager.isDarkMode &&
+                            GlobalThemeManager.currentThemeString == 'dark'
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await _changeTheme('system');
+                  },
+                  icon: const Icon(Icons.auto_mode),
+                  label: Text('تلقائي'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        GlobalThemeManager.currentThemeString == 'system'
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationSettings() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'إعدادات الإشعارات',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 24),
+
+          // Email Notifications
+          _buildSettingItem(
+            title: 'الإشعارات عبر البريد الإلكتروني',
+            subtitle: 'استقبال الإشعارات المهمة عبر البريد الإلكتروني',
+            icon: Icons.email,
+            child: Switch(
+              value: _emailNotificationsEnabled,
+              onChanged: (value) =>
+                  setState(() => _emailNotificationsEnabled = value),
+              activeColor: AppColors.primaryDark,
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Push Notifications
+          _buildSettingItem(
+            title: 'الإشعارات الفورية',
+            subtitle: 'تلقي إشعارات فورية عند حدوث أحداث مهمة',
+            icon: Icons.notifications,
+            child: Switch(
+              value: _pushNotificationsEnabled,
+              onChanged: (value) =>
+                  setState(() => _pushNotificationsEnabled = value),
+              activeColor: AppColors.primaryDark,
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Notification Types
+          Text(
+            'أنواع الإشعارات',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          _buildNotificationTypeItem('منجز جديد', true),
+          _buildNotificationTypeItem('تحديث حالة المنجز', true),
+          _buildNotificationTypeItem('مستخدم جديد', false),
+          _buildNotificationTypeItem('تقرير شهري', true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecuritySettings() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'الأمان والحماية',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 24),
+
+          // Two Factor Authentication
+          _buildSettingItem(
+            title: 'المصادقة الثنائية',
+            subtitle: 'تفعيل المصادقة الثنائية لحماية إضافية',
+            icon: Icons.security,
+            child: Switch(
+              value: _twoFactorEnabled,
+              onChanged: (value) => setState(() => _twoFactorEnabled = value),
+              activeColor: AppColors.primaryDark,
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Audit Log
+          _buildSettingItem(
+            title: 'سجل العمليات',
+            subtitle: 'تسجيل جميع العمليات المهمة في النظام',
+            icon: Icons.history,
+            child: Switch(
+              value: _auditLogEnabled,
+              onChanged: (value) => setState(() => _auditLogEnabled = value),
+              activeColor: AppColors.primaryDark,
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Password Policy
+          _buildPasswordPolicySection(),
+
+          const Divider(height: 32),
+
+          // Security Actions
+          Text(
+            'إجراءات الأمان',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      _showSecurityDialog('إعادة تعيين كلمات المرور'),
+                  icon: const Icon(Icons.lock_reset),
+                  label: Text('إعادة تعيين كلمات المرور'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: warningColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _showSecurityDialog('إنهاء جميع الجلسات'),
+                  icon: const Icon(Icons.logout),
+                  label: Text('إنهاء جميع الجلسات'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: errorColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserSettings() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'إدارة المستخدمين والأدوار',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 24),
+
+          // Auto Achievement Approval
+          _buildSettingItem(
+            title: 'الاعتماد التلقائي للمنجزات',
+            subtitle: 'اعتماد المنجزات تلقائياً بدون مراجعة',
+            icon: Icons.auto_awesome,
+            child: Switch(
+              value: _achievementAutoApproval,
+              onChanged: (value) =>
+                  setState(() => _achievementAutoApproval = value),
+              activeColor: AppColors.primaryDark,
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Module Permissions
+          Text(
+            'صلاحيات الوحدات',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          ..._modulePermissions.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Icon(_getModuleIcon(entry.key), color: AppColors.primaryDark),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(_getModuleName(entry.key)),
+                  ),
+                  Switch(
+                    value: entry.value,
+                    onChanged: (value) {
+                      setState(() {
+                        _modulePermissions[entry.key] = value;
+                      });
+                    },
+                    activeColor: AppColors.primaryDark,
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+
+          const Divider(height: 32),
+
+          // User Management Actions
+          Text(
+            'إجراءات إدارة المستخدمين',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _navigateToUserManagement(),
+                  icon: const Icon(Icons.people),
+                  label: Text('إدارة المستخدمين'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryDark,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _exportUserReport(),
+                  icon: const Icon(Icons.download),
+                  label: Text('تصدير قائمة المستخدمين'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: successColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSystemSettings() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'إعدادات النظام والصيانة',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 24),
+
+          // Maintenance Mode
+          _buildSettingItem(
+            title: 'وضع الصيانة',
+            subtitle: 'تفعيل وضع الصيانة لمنع وصول المستخدمين',
+            icon: Icons.build,
+            child: Switch(
+              value: _maintenanceModeEnabled,
+              onChanged: (value) =>
+                  setState(() => _maintenanceModeEnabled = value),
+              activeColor: AppColors.primaryDark,
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // Backup Settings
+          _buildSettingItem(
+            title: 'النسخ الاحتياطي التلقائي',
+            subtitle: 'تفعيل النسخ الاحتياطي التلقائي للبيانات',
+            icon: Icons.backup,
+            child: Switch(
+              value: _backupEnabled,
+              onChanged: (value) => setState(() => _backupEnabled = value),
+              activeColor: AppColors.primaryDark,
+            ),
+          ),
+
+          if (_backupEnabled) ...[
+            SizedBox(height: 16),
+            _buildSettingItem(
+              title: 'تكرار النسخ الاحتياطي',
+              subtitle: 'تحديد معدل إنشاء النسخ الاحتياطية',
+              icon: Icons.schedule,
+              child: DropdownButton<String>(
+                value: _backupFrequency,
+                onChanged: (value) => setState(() => _backupFrequency = value!),
+                items: const [
+                  DropdownMenuItem(value: 'hourly', child: Text('كل ساعة')),
+                  DropdownMenuItem(value: 'daily', child: Text('يومياً')),
+                  DropdownMenuItem(value: 'weekly', child: Text('أسبوعياً')),
+                  DropdownMenuItem(value: 'monthly', child: Text('شهرياً')),
+                ],
+              ),
+            ),
+          ],
+
+          const Divider(height: 32),
+
+          // File Upload Settings
+          _buildSettingItem(
+            title: 'حد حجم الملف الأقصى',
+            subtitle: 'أقصى حجم للملفات المرفوعة (بالميجابايت)',
+            icon: Icons.file_upload,
+            child: SizedBox(
+              width: 100,
+              child: TextFormField(
+                initialValue: _maxFileSize.toString(),
+                keyboardType: TextInputType.number,
+                onChanged: (value) => _maxFileSize = int.tryParse(value) ?? 10,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                  suffixText: 'MB',
+                ),
+              ),
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // System Actions
+          Text(
+            'إجراءات النظام',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () => _createBackup(),
+                icon: const Icon(Icons.backup),
+                label: Text('إنشاء نسخة احتياطية'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryDark,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _clearCache(),
+                icon: const Icon(Icons.clear),
+                label: Text('مسح التخزين المؤقت'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: warningColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _showSystemInfo(),
+                icon: const Icon(Icons.info),
+                label: Text('معلومات النظام'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: successColor,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIntegrationSettings() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'التكامل والAPI',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 24),
+
+          // API Settings
+          _buildSettingItem(
+            title: 'API Token',
+            subtitle: 'مفتاح API للتكامل مع الأنظمة الخارجية',
+            icon: Icons.key,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: AppColors.primaryLight.withValues(alpha: 0.3)),
+                    ),
+                    child: Text(
+                      'sk-1234567890abcdef...',
+                      style: TextStyle(fontFamily: 'monospace'),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                IconButton(
+                  onPressed: () => _regenerateApiToken(),
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'إعادة إنشاء المفتاح',
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 32),
+
+          // External Integrations
+          Text(
+            'التكاملات الخارجية',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          _buildIntegrationItem(
+            'Microsoft Office 365',
+            'تكامل مع حزمة مايكروسوفت أوفيس',
+            Icons.business,
+            true,
+          ),
+          _buildIntegrationItem(
+            'Google Workspace',
+            'تكامل مع خدمات جوجل للعمل',
+            Icons.work,
+            false,
+          ),
+          _buildIntegrationItem(
+            'Slack',
+            'إرسال الإشعارات عبر Slack',
+            Icons.chat,
+            false,
+          ),
+
+          const Divider(height: 32),
+
+          // Webhook Settings
+          Text(
+            'إعدادات Webhooks',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+
+          ElevatedButton.icon(
+            onPressed: () => _manageWebhooks(),
+            icon: const Icon(Icons.webhook),
+            label: Text('إدارة Webhooks'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryDark,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper Widgets for Settings
+  Widget _buildSettingItem({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primaryLight.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: AppColors.primaryDark),
+        ),
+        SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+
+  Widget _buildColorPreview(Color color, String label) {
+    return Column(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+          ),
+        ),
+        SizedBox(height: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotificationTypeItem(String title, bool enabled) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            enabled ? Icons.notifications_active : Icons.notifications_off,
+            color: enabled ? AppColors.primaryDark : AppColors.onSurfaceVariant,
+            size: 20,
+          ),
+          SizedBox(width: 12),
+          Expanded(child: Text(title)),
+          Switch(
+            value: enabled,
+            onChanged: (value) {},
+            activeColor: AppColors.primaryDark,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordPolicySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'التحليلات والإحصائيات',
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: AppColors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
+          'سياسة كلمات المرور',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
-        const SizedBox(height: 24),
-        const Center(
-          child: Text(
-            'قسم التحليلات والإحصائيات\n(قيد التطوير)',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, color: AppColors.onSurfaceVariant),
-          ),
-        ),
+        SizedBox(height: 12),
+        _buildPolicyItem('الحد الأدنى 8 أحرف', true),
+        _buildPolicyItem('يجب أن تحتوي على أرقام', true),
+        _buildPolicyItem('يجب أن تحتوي على رموز خاصة', true),
+        _buildPolicyItem('يجب أن تحتوي على أحرف كبيرة وصغيرة', false),
       ],
+    );
+  }
+
+  Widget _buildPolicyItem(String text, bool enabled) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(
+            enabled ? Icons.check_circle : Icons.radio_button_unchecked,
+            color: enabled ? successColor : AppColors.onSurfaceVariant,
+            size: 16,
+          ),
+          SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              color: enabled ? AppColors.onSurface : AppColors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIntegrationItem(
+      String title, String subtitle, IconData icon, bool enabled) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border:
+              Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: enabled
+                    ? AppColors.primaryDark
+                    : AppColors.onSurfaceVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: enabled,
+              onChanged: (value) {},
+              activeColor: AppColors.primaryDark,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper Methods for Settings
+  IconData _getModuleIcon(String module) {
+    switch (module) {
+      case 'achievements':
+        return Icons.emoji_events;
+      case 'users':
+        return Icons.people;
+      case 'analytics':
+        return Icons.analytics;
+      case 'reports':
+        return Icons.assessment;
+      case 'settings':
+        return Icons.settings;
+      default:
+        return Icons.help;
+    }
+  }
+
+  String _getModuleName(String module) {
+    switch (module) {
+      case 'achievements':
+        return 'إدارة المنجزات';
+      case 'users':
+        return 'إدارة المستخدمين';
+      case 'analytics':
+        return 'التحليلات';
+      case 'reports':
+        return 'التقارير';
+      case 'settings':
+        return 'الإعدادات';
+      default:
+        return 'غير محدد';
+    }
+  }
+
+  // Action Methods for Settings
+  void _showSecurityDialog(String action) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(action),
+        content: Text('هل أنت متأكد من تنفيذ $action؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('تم تنفيذ $action بنجاح')),
+              );
+            },
+            child: Text('تأكيد'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToUserManagement() {
+    setState(() => _selectedSidebarIndex = 3);
+  }
+
+  void _exportUserReport() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('جاري تصدير قائمة المستخدمين...'),
+        backgroundColor: AppColors.primaryDark,
+      ),
+    );
+  }
+
+  void _createBackup() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('جاري إنشاء نسخة احتياطية...'),
+        backgroundColor: successColor,
+      ),
+    );
+  }
+
+  void _clearCache() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('تم مسح التخزين المؤقت بنجاح'),
+        backgroundColor: warningColor,
+      ),
+    );
+  }
+
+  void _showSystemInfo() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('معلومات النظام'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('الإصدار: 1.0.0'),
+            Text('آخر تحديث: 2025-08-07'),
+            Text('قاعدة البيانات: Firebase'),
+            Text('الخادم: Google Cloud'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('إغلاق'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _regenerateApiToken() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('إعادة إنشاء مفتاح API'),
+        content: Text('سيؤدي هذا إلى إبطال المفتاح الحالي. هل تريد المتابعة؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('تم إنشاء مفتاح API جديد')),
+              );
+            },
+            child: Text('تأكيد'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _manageWebhooks() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('صفحة إدارة Webhooks قيد التطوير'),
+        backgroundColor: AppColors.primaryDark,
+      ),
     );
   }
 
@@ -4421,23 +6987,478 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'الإعدادات',
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: AppColors.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 24),
-        const Center(
-          child: Text(
-            'قسم الإعدادات\n(قيد التطوير)',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, color: AppColors.onSurfaceVariant),
-          ),
+        // Header
+        _buildSettingsHeader(),
+        SizedBox(height: 32),
+
+        // Content based on layout
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 1024) {
+              return _buildDesktopSettingsLayout();
+            } else if (constraints.maxWidth > 768) {
+              return _buildTabletSettingsLayout();
+            } else {
+              return _buildMobileSettingsLayout();
+            }
+          },
         ),
       ],
     );
+  }
+
+  Widget _buildSettingsHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryDark,
+            AppColors.primaryMedium,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryDark.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.settings,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+          SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'إعدادات النظام',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'إدارة إعدادات المنصة والتحكم في الخصائص المتقدمة',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white70,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: _saveAllSettings,
+            icon: const Icon(Icons.save),
+            label: Text('حفظ التغييرات'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.primaryDark,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopSettingsLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Settings Navigation Sidebar
+        SizedBox(
+          width: 280,
+          child: _buildSettingsNavigation(),
+        ),
+        SizedBox(width: 24),
+        // Settings Content
+        Expanded(
+          child: _buildSettingsPanel(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabletSettingsLayout() {
+    return Column(
+      children: [
+        // Horizontal Navigation Tabs
+        _buildHorizontalSettingsNavigation(),
+        SizedBox(height: 24),
+        // Settings Content
+        _buildSettingsPanel(),
+      ],
+    );
+  }
+
+  Widget _buildMobileSettingsLayout() {
+    return Column(
+      children: [
+        // Compact Navigation
+        _buildCompactSettingsNavigation(),
+        SizedBox(height: 20),
+        // Settings Content
+        _buildSettingsPanel(),
+      ],
+    );
+  }
+
+  Widget _buildSettingsNavigation() {
+    final settingsCategories = [
+      {
+        'id': 'general',
+        'title': 'الإعدادات العامة',
+        'icon': Icons.settings_outlined,
+        'description': 'إعدادات أساسية للنظام',
+      },
+      {
+        'id': 'appearance',
+        'title': 'المظهر والواجهة',
+        'icon': Icons.palette_outlined,
+        'description': 'تخصيص شكل ومظهر النظام',
+      },
+      {
+        'id': 'notifications',
+        'title': 'الإشعارات',
+        'icon': Icons.notifications_outlined,
+        'description': 'إدارة الإشعارات والتنبيهات',
+      },
+      {
+        'id': 'security',
+        'title': 'الأمان والحماية',
+        'icon': Icons.security_outlined,
+        'description': 'إعدادات الأمان المتقدمة',
+      },
+      {
+        'id': 'users',
+        'title': 'المستخدمين والأدوار',
+        'icon': Icons.people_outline,
+        'description': 'إدارة المستخدمين والصلاحيات',
+      },
+      {
+        'id': 'system',
+        'title': 'النظام والصيانة',
+        'icon': Icons.memory_outlined,
+        'description': 'إعدادات النظام والنسخ الاحتياطية',
+      },
+      {
+        'id': 'integration',
+        'title': 'التكامل والAPI',
+        'icon': Icons.api_outlined,
+        'description': 'إعدادات التكامل مع الأنظمة الخارجية',
+      },
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'أقسام الإعدادات',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 16),
+          ...settingsCategories.map((category) {
+            final isSelected = _selectedSettingsTab == category['id'];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => setState(
+                      () => _selectedSettingsTab = category['id'] as String),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryDark.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: isSelected
+                          ? Border.all(color: AppColors.primaryDark, width: 2)
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primaryDark
+                                : AppColors.primaryLight.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            category['icon'] as IconData,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.primaryDark,
+                            size: 20,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                category['title'] as String,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? AppColors.primaryDark
+                                          : AppColors.onSurface,
+                                    ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                category['description'] as String,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isSelected)
+                          const Icon(
+                            Icons.keyboard_arrow_left,
+                            color: AppColors.primaryDark,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalSettingsNavigation() {
+    final settingsCategories = [
+      {'id': 'general', 'title': 'عام', 'icon': Icons.settings_outlined},
+      {'id': 'appearance', 'title': 'المظهر', 'icon': Icons.palette_outlined},
+      {
+        'id': 'notifications',
+        'title': 'الإشعارات',
+        'icon': Icons.notifications_outlined
+      },
+      {'id': 'security', 'title': 'الأمان', 'icon': Icons.security_outlined},
+      {'id': 'users', 'title': 'المستخدمين', 'icon': Icons.people_outline},
+      {'id': 'system', 'title': 'النظام', 'icon': Icons.memory_outlined},
+      {'id': 'integration', 'title': 'التكامل', 'icon': Icons.api_outlined},
+    ];
+
+    return Container(
+      height: 80,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: settingsCategories.length,
+        itemBuilder: (context, index) {
+          final category = settingsCategories[index];
+          final isSelected = _selectedSettingsTab == category['id'];
+
+          return Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => setState(
+                    () => _selectedSettingsTab = category['id'] as String),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 120,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primaryDark : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primaryDark
+                          : AppColors.primaryLight.withValues(alpha: 0.3),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withValues(alpha: 0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        category['icon'] as IconData,
+                        color:
+                            isSelected ? Colors.white : AppColors.primaryDark,
+                        size: 24,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        category['title'] as String,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.onSurface,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCompactSettingsNavigation() {
+    final settingsCategories = [
+      {'id': 'general', 'title': 'عام', 'icon': Icons.settings_outlined},
+      {'id': 'appearance', 'title': 'المظهر', 'icon': Icons.palette_outlined},
+      {
+        'id': 'notifications',
+        'title': 'الإشعارات',
+        'icon': Icons.notifications_outlined
+      },
+      {'id': 'security', 'title': 'الأمان', 'icon': Icons.security_outlined},
+      {'id': 'users', 'title': 'المستخدمين', 'icon': Icons.people_outline},
+      {'id': 'system', 'title': 'النظام', 'icon': Icons.memory_outlined},
+      {'id': 'integration', 'title': 'التكامل', 'icon': Icons.api_outlined},
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          DropdownButtonFormField<String>(
+            value: _selectedSettingsTab,
+            onChanged: (value) => setState(() => _selectedSettingsTab = value!),
+            decoration: InputDecoration(
+              labelText: 'اختر قسم الإعدادات',
+              prefixIcon: Icon(
+                settingsCategories.firstWhere(
+                        (cat) => cat['id'] == _selectedSettingsTab)['icon']
+                    as IconData,
+                color: AppColors.primaryDark,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                    color: AppColors.primaryLight.withValues(alpha: 0.3)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.primaryDark),
+              ),
+            ),
+            items: settingsCategories.map((category) {
+              return DropdownMenuItem<String>(
+                value: category['id'] as String,
+                child: Row(
+                  children: [
+                    Icon(
+                      category['icon'] as IconData,
+                      color: AppColors.primaryDark,
+                      size: 20,
+                    ),
+                    SizedBox(width: 12),
+                    Text(category['title'] as String),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsPanel() {
+    switch (_selectedSettingsTab) {
+      case 'general':
+        return _buildGeneralSettings();
+      case 'appearance':
+        return _buildAppearanceSettings();
+      case 'notifications':
+        return _buildNotificationSettings();
+      case 'security':
+        return _buildSecuritySettings();
+      case 'users':
+        return _buildUserSettings();
+      case 'system':
+        return _buildSystemSettings();
+      case 'integration':
+        return _buildIntegrationSettings();
+      default:
+        return _buildGeneralSettings();
+    }
   }
 
   Widget _buildSidebarFooter() {
@@ -4445,8 +7466,79 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
+          // Theme Toggle Section
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  GlobalThemeManager.isDarkMode
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                  color: Colors.white70,
+                  size: 18,
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'المظهر: ${GlobalThemeManager.currentThemeDisplayName}',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    await GlobalThemeManager.toggleTheme();
+
+                    // تحديث الواجهة
+                    if (mounted) {
+                      setState(() {
+                        // إعادة بناء الواجهة مع الثيم الجديد
+                      });
+
+                      // إظهار رسالة تأكيد
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              'تم التبديل إلى المظهر ${GlobalThemeManager.currentThemeDisplayName}'),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.brightness_6,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 16),
           const Divider(color: Colors.white24, thickness: 1),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
+
           // User Info
           Row(
             children: [
@@ -4455,7 +7547,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 backgroundColor: Colors.white.withValues(alpha: 0.2),
                 child: const Icon(Icons.person, color: Colors.white, size: 20),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -4496,4 +7588,492 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       ),
     );
   }
+
+  // دوال مساعدة للرسومات البيانية الجديدة
+
+  Widget _buildActivityHeatMap() {
+    final data = _currentAnalyticsData!;
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+        childAspectRatio: 1.0,
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4,
+      ),
+      itemCount: 28, // 4 weeks
+      itemBuilder: (context, index) {
+        final intensity = (data['heatmapData']?[index] ?? 0) / 10.0;
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: intensity.clamp(0.1, 1.0)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Center(
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                color: intensity > 0.5 ? Colors.white : Colors.black87,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRadialProgressIndicators() {
+    final data = _currentAnalyticsData!;
+
+    final metrics = [
+      {
+        'title': 'معدل الاعتماد',
+        'value': data['approvalRate'] ?? 85.0,
+        'color': Colors.green,
+        'icon': Icons.check_circle,
+      },
+      {
+        'title': 'معدل الاستجابة',
+        'value': data['responseRate'] ?? 92.0,
+        'color': Colors.blue,
+        'icon': Icons.speed,
+      },
+      {
+        'title': 'رضا المستخدمين',
+        'value': data['satisfactionRate'] ?? 78.0,
+        'color': Colors.orange,
+        'icon': Icons.sentiment_satisfied,
+      },
+      {
+        'title': 'الكفاءة',
+        'value': data['efficiencyRate'] ?? 88.0,
+        'color': Colors.purple,
+        'icon': Icons.trending_up,
+      },
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: constraints.maxWidth > 400 ? 2 : 1,
+            childAspectRatio: 1.5,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: metrics.length,
+          itemBuilder: (context, index) {
+            final metric = metrics[index];
+            return _buildRadialProgressCard(
+              title: metric['title'] as String,
+              value: metric['value'] as double,
+              color: metric['color'] as Color,
+              icon: metric['icon'] as IconData,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildRadialProgressCard({
+    required String title,
+    required double value,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 80,
+                height: 80,
+                child: CircularProgressIndicator(
+                  value: value / 100,
+                  strokeWidth: 6,
+                  backgroundColor: color.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: color, size: 20),
+                  SizedBox(height: 4),
+                  Text(
+                    '${value.round()}%',
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceMetricsGrid() {
+    final data = _currentAnalyticsData!;
+
+    final metrics = [
+      {
+        'title': 'متوسط وقت المراجعة',
+        'value': '${data['avgReviewTime'] ?? 2.5} يوم',
+        'trend': '+5%',
+        'isPositive': true,
+        'icon': Icons.timer,
+        'color': Colors.blue,
+      },
+      {
+        'title': 'معدل الإنجاز الشهري',
+        'value': '${data['monthlyCompletion'] ?? 87}%',
+        'trend': '+12%',
+        'isPositive': true,
+        'icon': Icons.trending_up,
+        'color': Colors.green,
+      },
+      {
+        'title': 'المنجزات المتأخرة',
+        'value': '${data['overdueAchievements'] ?? 3}',
+        'trend': '-8%',
+        'isPositive': true,
+        'icon': Icons.warning,
+        'color': Colors.orange,
+      },
+      {
+        'title': 'مستوى الجودة',
+        'value': '${data['qualityScore'] ?? 4.2}/5',
+        'trend': '+3%',
+        'isPositive': true,
+        'icon': Icons.star,
+        'color': Colors.purple,
+      },
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 2.0,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: metrics.length,
+      itemBuilder: (context, index) {
+        final metric = metrics[index];
+        return _buildMetricCard(
+          title: metric['title'] as String,
+          value: metric['value'] as String,
+          trend: metric['trend'] as String,
+          isPositive: metric['isPositive'] as bool,
+          icon: metric['icon'] as IconData,
+          color: metric['color'] as Color,
+        );
+      },
+    );
+  }
+
+  Widget _buildMetricCard({
+    required String title,
+    required String value,
+    required String trend,
+    required bool isPositive,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 16),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: (isPositive ? Colors.green : Colors.red)
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  trend,
+                  style: TextStyle(
+                    color: isPositive ? Colors.green : Colors.red,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Custom Painters للرسومات البيانية المتقدمة
+
+class AreaChartPainter extends CustomPainter {
+  final Map<String, dynamic> data;
+
+  AreaChartPainter(this.data);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          AppColors.primaryLight.withValues(alpha: 0.8),
+          AppColors.primaryLight.withValues(alpha: 0.2),
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    final linePaint = Paint()
+      ..color = AppColors.primaryDark
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+
+    final values =
+        List<double>.from(data['weeklyData'] ?? [10, 15, 12, 18, 22, 20, 25]);
+    final path = Path();
+    final linePath = Path();
+
+    if (values.isNotEmpty) {
+      final maxValue = values.reduce((a, b) => a > b ? a : b);
+      final stepX = size.width / (values.length - 1);
+
+      // إنشاء المسار للمنطقة المملوءة
+      path.moveTo(0, size.height);
+      linePath.moveTo(0, size.height - (values[0] / maxValue * size.height));
+
+      for (int i = 0; i < values.length; i++) {
+        final x = i * stepX;
+        final y = size.height - (values[i] / maxValue * size.height);
+
+        path.lineTo(x, y);
+        if (i == 0) {
+          linePath.moveTo(x, y);
+        } else {
+          linePath.lineTo(x, y);
+        }
+      }
+
+      path.lineTo(size.width, size.height);
+      path.close();
+
+      canvas.drawPath(path, paint);
+      canvas.drawPath(linePath, linePaint);
+
+      // رسم النقاط
+      final pointPaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+
+      final pointBorderPaint = Paint()
+        ..color = AppColors.primaryDark
+        ..strokeWidth = 2
+        ..style = PaintingStyle.stroke;
+
+      for (int i = 0; i < values.length; i++) {
+        final x = i * stepX;
+        final y = size.height - (values[i] / maxValue * size.height);
+
+        canvas.drawCircle(Offset(x, y), 6, pointPaint);
+        canvas.drawCircle(Offset(x, y), 6, pointBorderPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class RadarChartPainter extends CustomPainter {
+  final Map<String, dynamic> data;
+
+  RadarChartPainter(this.data);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2 - 40;
+
+    final gridPaint = Paint()
+      ..color = Colors.grey.withValues(alpha: 0.3)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    final dataPaint = Paint()
+      ..color = Colors.blue.withValues(alpha: 0.3)
+      ..style = PaintingStyle.fill;
+
+    final dataStrokePaint = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    final departments =
+        data['departmentPerformance'] as Map<String, dynamic>? ?? {};
+    final labels = departments.keys.toList();
+    final values = departments.values.cast<double>().toList();
+
+    if (labels.isNotEmpty) {
+      final maxValue =
+          values.isNotEmpty ? values.reduce((a, b) => a > b ? a : b) : 100.0;
+      final angleStep = 2 * math.pi / labels.length;
+
+      // رسم الشبكة
+      for (int i = 1; i <= 5; i++) {
+        final r = radius * i / 5;
+        canvas.drawCircle(center, r, gridPaint);
+      }
+
+      // رسم الخطوط الشعاعية
+      for (int i = 0; i < labels.length; i++) {
+        final angle = i * angleStep - math.pi / 2;
+        final endPoint = Offset(
+          center.dx + radius * math.cos(angle),
+          center.dy + radius * math.sin(angle),
+        );
+        canvas.drawLine(center, endPoint, gridPaint);
+      }
+
+      // رسم البيانات
+      final dataPath = Path();
+      for (int i = 0; i < values.length; i++) {
+        final angle = i * angleStep - math.pi / 2;
+        final value = values[i] / maxValue;
+        final dataRadius = radius * value;
+        final point = Offset(
+          center.dx + dataRadius * math.cos(angle),
+          center.dy + dataRadius * math.sin(angle),
+        );
+
+        if (i == 0) {
+          dataPath.moveTo(point.dx, point.dy);
+        } else {
+          dataPath.lineTo(point.dx, point.dy);
+        }
+      }
+      dataPath.close();
+
+      canvas.drawPath(dataPath, dataPaint);
+      canvas.drawPath(dataPath, dataStrokePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class ScatterPlotPainter extends CustomPainter {
+  final Map<String, dynamic> data;
+
+  ScatterPlotPainter(this.data);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final axisPaint = Paint()
+      ..color = Colors.grey.withValues(alpha: 0.5)
+      ..strokeWidth = 1;
+
+    final pointPaint = Paint()
+      ..color = Colors.orange
+      ..style = PaintingStyle.fill;
+
+    // رسم المحاور
+    canvas.drawLine(
+      Offset(40, size.height - 40),
+      Offset(size.width - 20, size.height - 40),
+      axisPaint,
+    );
+    canvas.drawLine(
+      Offset(40, size.height - 40),
+      Offset(40, 20),
+      axisPaint,
+    );
+
+    // رسم النقاط المبعثرة
+    final scatterData = data['scatterData'] as List? ?? [];
+    final plotWidth = size.width - 60;
+    final plotHeight = size.height - 60;
+
+    for (var point in scatterData) {
+      final x = 40.0 + (point['x'] / 100) * plotWidth;
+      final y = size.height - 40.0 - (point['y'] / 100) * plotHeight;
+
+      canvas.drawCircle(Offset(x, y), 4, pointPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

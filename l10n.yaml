@@ -1,0 +1,28 @@
+# Localization configuration file
+# This file configures the generation of localization files for the application
+
+# ARB files location
+arb-dir: lib/l10n
+# Template ARB file (English as default)
+template-arb-file: app_en.arb
+# Output directory for generated files
+output-dir: lib/generated/l10n
+# Output localization file name
+output-localization-file: app_localizations.dart
+# Class name for generated localizations
+output-class: AppLocalizations
+
+# Whether to generate synthetic package
+synthetic-package: false
+
+# Preferred supported locales
+preferred-supported-locales: ["ar", "en"]
+
+# Use deferred loading
+use-deferred-loading: false
+
+# Replace message placeholders with appropriate values
+replace-message-placeholder: true
+
+# Generate null-safe code
+null-safe: true

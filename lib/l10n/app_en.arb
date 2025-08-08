@@ -1,0 +1,1046 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2025-01-08T10:00:00.000Z",
+  
+  "appTitle": "Achievements Portal",
+  "@appTitle": {
+    "description": "Main application title"
+  },
+  
+  "healthCluster": "Jeddah Health Cluster II",
+  "@healthCluster": {
+    "description": "Health cluster name"
+  },
+  
+  "welcome": "Welcome",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+  "portalAdministration": "Admin Dashboard",
+  "@portalAdministration": {
+    "description": "Admin Dashboard"
+  },
+  
+  "login": "Login",
+  "@login": {
+    "description": "Login"
+  },
+  
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout"
+  },
+
+  "adminDashboard": "Admin Dashboard",
+  "@adminDashboard": {
+    "description": "Admin Dashboard"
+  },
+
+  "mainDashboard": "Main Dashboard",
+  "@mainDashboard": {
+    "description": "Main Dashboard"
+  },
+
+  "quickReview": "Quick Review",
+  "@quickReview": {
+    "description": "Quick Review"
+  },
+
+  "achievementsManagement": "Achievements Management",
+  "@achievementsManagement": {
+    "description": "Achievements Management"
+  },
+
+  "usersManagement": "Users Management",
+  "@usersManagement": {
+    "description": "Users Management"
+  },
+
+  "reportsAndAnalytics": "Reports and Analytics",
+  "@reportsAndAnalytics": {
+    "description": "Reports and Analytics"
+  },
+
+  "adminSettings": "Admin Settings",
+  "@adminSettings": {
+    "description": "Admin Settings"
+  },
+
+  "systemSettings": "System Settings",
+  "@systemSettings": {
+    "description": "System Settings"
+  },
+
+  "generalSettings": "General Settings",
+  "@generalSettings": {
+    "description": "General Settings"
+  },
+
+  "appearanceAndInterface": "Appearance and Interface",
+  "@appearanceAndInterface": {
+    "description": "Appearance and Interface"
+  },
+
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications"
+  },
+
+  "securityAndProtection": "Security and Protection",
+  "@securityAndProtection": {
+    "description": "Security and Protection"
+  },
+
+  "usersAndRoles": "Users and Roles",
+  "@usersAndRoles": {
+    "description": "Users and Roles"
+  },
+
+  "systemAndMaintenance": "System and Maintenance",
+  "@systemAndMaintenance": {
+    "description": "System and Maintenance"
+  },
+
+  "integrationAndAPI": "Integration and API",
+  "@integrationAndAPI": {
+    "description": "Integration and API"
+  },
+
+  "welcomeToDashboard": "Welcome to Dashboard",
+  "@welcomeToDashboard": {
+    "description": "Welcome to Dashboard"
+  },
+
+  "trackAchievementsEasily": "Track achievements and manage system easily",
+  "@trackAchievementsEasily": {
+    "description": "Track achievements and manage system easily"
+  },
+
+  "refreshData": "Refresh Data",
+  "@refreshData": {
+    "description": "Refresh Data"
+  },
+
+  "pendingAchievements": "Pending Achievements",
+  "@pendingAchievements": {
+    "description": "Pending Achievements"
+  },
+
+  "approvedAchievements": "Approved Achievements",
+  "@approvedAchievements": {
+    "description": "Approved Achievements"
+  },
+
+  "rejectedAchievements": "Rejected Achievements",
+  "@rejectedAchievements": {
+    "description": "Rejected Achievements"
+  },
+
+  "totalAchievements": "Total Achievements",
+  "@totalAchievements": {
+    "description": "Total Achievements"
+  },
+
+  "approved": "Approved",
+  "@approved": {
+    "description": "Approved"
+  },
+
+  "activeUsers": "Active Users",
+  "@activeUsers": {
+    "description": "Active Users"
+  },
+
+  "mostActiveDepartments": "Most Active Departments",
+  "@mostActiveDepartments": {
+    "description": "Most Active Departments"
+  },
+
+  "pending": "Pending",
+  "@pending": {
+    "description": "Pending"
+  },
+
+  "rejected": "Rejected",
+  "@rejected": {
+    "description": "Rejected"
+  },
+
+  "today": "Today",
+  "@today": {
+    "description": "Today"
+  },
+
+  "thisWeek": "This Week",
+  "@thisWeek": {
+    "description": "This Week"
+  },
+
+  "departments": "Departments",
+  "@departments": {
+    "description": "Departments"
+  },
+
+  "total": "Total",
+  "@total": {
+    "description": "Total"
+  },
+
+  "quickFilter": "Quick Filter",
+  "@quickFilter": {
+    "description": "Quick Filter"
+  },
+
+  "all": "All",
+  "@all": {
+    "description": "All"
+  },
+
+  "urgentOnly": "Urgent Only",
+  "@urgentOnly": {
+    "description": "Urgent Only"
+  },
+
+  "sortBy": "Sort By",
+  "@sortBy": {
+    "description": "Sort By"
+  },
+
+  "date": "Date",
+  "@date": {
+    "description": "Date"
+  },
+
+  "department": "Department",
+  "@department": {
+    "description": "Department"
+  },
+
+  "priority": "Priority",
+  "@priority": {
+    "description": "Priority"
+  },
+
+  "urgent": "Urgent",
+  "@urgent": {
+    "description": "Urgent"
+  },
+
+  "medium": "Medium",
+  "@medium": {
+    "description": "Medium"
+  },
+
+  "newItem": "New",
+  "@newItem": {
+    "description": "New"
+  },
+
+  "mediumPriority": "Medium Priority",
+  "@mediumPriority": {
+    "description": "Medium Priority"
+  },
+
+  "daysPassed": "{count} {days} passed",
+  "@daysPassed": {
+    "description": "Number of days passed",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+
+  "day": "day",
+  "@day": {
+    "description": "day"
+  },
+
+  "days": "days",
+  "@days": {
+    "description": "days"
+  },
+
+  "searchInTopicGoalDepartment": "Search in topic, goal, department...",
+  "@searchInTopicGoalDepartment": {
+    "description": "Search in topic, goal, department..."
+  },
+
+  "advancedFilters": "Advanced Filters",
+  "@advancedFilters": {
+    "description": "Advanced Filters"
+  },
+
+  "status": "Status",
+  "@status": {
+    "description": "Status"
+  },
+
+  "allStatuses": "All Statuses",
+  "@allStatuses": {
+    "description": "All Statuses"
+  },
+
+  "allDepartments": "All Departments",
+  "@allDepartments": {
+    "description": "All Departments"
+  },
+
+  "humanResources": "Human Resources",
+  "@humanResources": {
+    "description": "Human Resources"
+  },
+
+  "informationTechnology": "Information Technology",
+  "@informationTechnology": {
+    "description": "Information Technology"
+  },
+
+  "finance": "Finance",
+  "@finance": {
+    "description": "Finance"
+  },
+
+  "medical": "Medical",
+  "@medical": {
+    "description": "Medical"
+  },
+
+  "administrative": "Administrative",
+  "@administrative": {
+    "description": "Administrative"
+  },
+
+  "nursing": "Nursing",
+  "@nursing": {
+    "description": "Nursing"
+  },
+
+  "selectDateRange": "Select Date Range",
+  "@selectDateRange": {
+    "description": "Select Date Range"
+  },
+
+  "applyFilters": "Apply Filters",
+  "@applyFilters": {
+    "description": "Apply Filters"
+  },
+
+  "clearFilters": "Clear Filters",
+  "@clearFilters": {
+    "description": "Clear Filters"
+  },
+
+  "achievementDetails": "Achievement Details",
+  "@achievementDetails": {
+    "description": "Achievement Details"
+  },
+
+  "topic": "Topic",
+  "@topic": {
+    "description": "Topic"
+  },
+
+  "goal": "Goal",
+  "@goal": {
+    "description": "Goal"
+  },
+
+  "participationType": "Participation Type",
+  "@participationType": {
+    "description": "Participation Type"
+  },
+
+  "executiveDepartment": "Executive Department",
+  "@executiveDepartment": {
+    "description": "Executive Department"
+  },
+
+  "approve": "Approve",
+  "@approve": {
+    "description": "Approve"
+  },
+
+  "reject": "Reject",
+  "@reject": {
+    "description": "Reject"
+  },
+
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit"
+  },
+
+  "statusPending": "Pending",
+  "@statusPending": {
+    "description": "Pending"
+  },
+
+  "statusApproved": "Approved",
+  "@statusApproved": {
+    "description": "Approved"
+  },
+
+  "statusRejected": "Rejected",
+  "@statusRejected": {
+    "description": "Rejected"
+  },
+
+  "statusUndefined": "Undefined",
+  "@statusUndefined": {
+    "description": "Undefined"
+  },
+
+  "exportToExcel": "Export to Excel",
+  "@exportToExcel": {
+    "description": "Export to Excel"
+  },
+
+  "exportToCSV": "Export to CSV",
+  "@exportToCSV": {
+    "description": "Export to CSV"
+  },
+
+  "printReport": "Print Report",
+  "@printReport": {
+    "description": "Print Report"
+  },
+
+  "weeklyReport": "Weekly Report",
+  "@weeklyReport": {
+    "description": "Weekly Report"
+  },
+
+  "monthlyReport": "Monthly Report",
+  "@monthlyReport": {
+    "description": "Monthly Report"
+  },
+
+  "yearlyReport": "Yearly Report",
+  "@yearlyReport": {
+    "description": "Yearly Report"
+  },
+
+  "exportReport": "Export Report",
+  "@exportReport": {
+    "description": "Export Report"
+  },
+
+  "achievementsTrend": "Achievements Trend",
+  "@achievementsTrend": {
+    "description": "Achievements Trend"
+  },
+
+  "achievementsStatusDistribution": "Achievements Status Distribution",
+  "@achievementsStatusDistribution": {
+    "description": "Achievements Status Distribution"
+  },
+
+  "achievementsByDepartment": "Achievements by Department",
+  "@achievementsByDepartment": {
+    "description": "Achievements by Department"
+  },
+
+  "choosePeriodToShowAnalytics": "Choose report period to show analytics",
+  "@choosePeriodToShowAnalytics": {
+    "description": "Choose report period to show analytics"
+  },
+
+  "detailedStatistics": "Detailed Statistics",
+  "@detailedStatistics": {
+    "description": "Detailed Statistics"
+  },
+
+  "approvalRate": "Approval Rate",
+  "@approvalRate": {
+    "description": "Approval Rate"
+  },
+
+  "annualGrowthRate": "Annual Growth Rate",
+  "@annualGrowthRate": {
+    "description": "Annual Growth Rate"
+  },
+
+  "totalUsers": "Total Users",
+  "@totalUsers": {
+    "description": "Total Users"
+  },
+
+  "timePeriod": "Time Period",
+  "@timePeriod": {
+    "description": "Time Period"
+  },
+
+  "saveChanges": "Save Changes",
+  "@saveChanges": {
+    "description": "Save Changes"
+  },
+
+  "platformSettingsManagement": "Platform settings management and advanced features control",
+  "@platformSettingsManagement": {
+    "description": "Platform settings management and advanced features control"
+  },
+
+  "language": "Language",
+  "@language": {
+    "description": "Language"
+  },
+
+  "chooseSystemLanguage": "Choose system interface language",
+  "@chooseSystemLanguage": {
+    "description": "Choose system interface language"
+  },
+
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Appearance"
+  },
+
+  "chooseAppearanceStyle": "Choose appearance style (applies immediately)",
+  "@chooseAppearanceStyle": {
+    "description": "Choose appearance style (applies immediately)"
+  },
+
+  "light": "Light",
+  "@light": {
+    "description": "Light"
+  },
+
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark"
+  },
+
+  "automatic": "Automatic",
+  "@automatic": {
+    "description": "Automatic"
+  },
+
+  "sessionTimeout": "Session Timeout",
+  "@sessionTimeout": {
+    "description": "Session Timeout"
+  },
+
+  "sessionTimeoutDescription": "Duration to stay in system without activity (in minutes)",
+  "@sessionTimeoutDescription": {
+    "description": "Duration to stay in system without activity (in minutes)"
+  },
+
+  "defaultUserRole": "Default role for new users",
+  "@defaultUserRole": {
+    "description": "Default role for new users"
+  },
+
+  "defaultUserRoleDescription": "Role automatically assigned to new users",
+  "@defaultUserRoleDescription": {
+    "description": "Role automatically assigned to new users"
+  },
+
+  "regularUser": "Regular User",
+  "@regularUser": {
+    "description": "Regular User"
+  },
+
+  "moderator": "Moderator",
+  "@moderator": {
+    "description": "Moderator"
+  },
+
+  "admin": "Admin",
+  "@admin": {
+    "description": "Admin"
+  },
+
+  "appearanceStyle": "Appearance Style",
+  "@appearanceStyle": {
+    "description": "Appearance Style"
+  },
+
+  "appearanceStyleDescription": "Choose preferred display style (applies immediately)",
+  "@appearanceStyleDescription": {
+    "description": "Choose preferred display style (applies immediately)"
+  },
+
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark Mode"
+  },
+
+  "darkModeDescription": "Enable/disable dark appearance (quick toggle)",
+  "@darkModeDescription": {
+    "description": "Enable/disable dark appearance (quick toggle)"
+  },
+
+  "languageSettingsTitle": "Language Settings",
+  "@languageSettingsTitle": {
+    "description": "Language Settings"
+  },
+
+  "currentTheme": "Current Theme",
+  "@currentTheme": {
+    "description": "Current Theme"
+  },
+
+  "currentThemeDescription": "Currently applied style",
+  "@currentThemeDescription": {
+    "description": "Currently applied style"
+  },
+
+  "systemColors": "System Colors",
+  "@systemColors": {
+    "description": "System Colors"
+  },
+
+  "systemColorsDescription": "Preview of colors used in the system",
+  "@systemColorsDescription": {
+    "description": "Preview of colors used in the system"
+  },
+
+  "primaryColors": "Primary Colors",
+  "@primaryColors": {
+    "description": "Primary Colors"
+  },
+
+  "primary": "Primary",
+  "@primary": {
+    "description": "Primary"
+  },
+
+  "surfaceColors": "Surface Colors",
+  "@surfaceColors": {
+    "description": "Surface Colors"
+  },
+
+  "background": "Background",
+  "@background": {
+    "description": "Background"
+  },
+
+  "cards": "Cards",
+  "@cards": {
+    "description": "Cards"
+  },
+
+  "fontSize": "Font Size",
+  "@fontSize": {
+    "description": "Font Size"
+  },
+
+  "fontSizeDescription": "Customize font size in the system",
+  "@fontSizeDescription": {
+    "description": "Customize font size in the system"
+  },
+
+  "small": "Small",
+  "@small": {
+    "description": "Small"
+  },
+
+  "large": "Large",
+  "@large": {
+    "description": "Large"
+  },
+
+  "quickThemeChange": "Quick Theme Change",
+  "@quickThemeChange": {
+    "description": "Quick Theme Change"
+  },
+
+  "notificationSettings": "Notification Settings",
+  "@notificationSettings": {
+    "description": "Notification Settings"
+  },
+
+  "emailNotifications": "Email Notifications",
+  "@emailNotifications": {
+    "description": "Email Notifications"
+  },
+
+  "emailNotificationsDescription": "Receive important notifications via email",
+  "@emailNotificationsDescription": {
+    "description": "Receive important notifications via email"
+  },
+
+  "pushNotifications": "Push Notifications",
+  "@pushNotifications": {
+    "description": "Push Notifications"
+  },
+
+  "pushNotificationsDescription": "Receive instant notifications when important events occur",
+  "@pushNotificationsDescription": {
+    "description": "Receive instant notifications when important events occur"
+  },
+
+  "notificationTypes": "Notification Types",
+  "@notificationTypes": {
+    "description": "Notification Types"
+  },
+
+  "newAchievement": "New Achievement",
+  "@newAchievement": {
+    "description": "New Achievement"
+  },
+
+  "achievementStatusUpdate": "Achievement Status Update",
+  "@achievementStatusUpdate": {
+    "description": "Achievement Status Update"
+  },
+
+  "newUser": "New User",
+  "@newUser": {
+    "description": "New User"
+  },
+
+  "monthlyReport2": "Monthly Report",
+  "@monthlyReport2": {
+    "description": "Monthly Report"
+  },
+
+  "twoFactorAuthentication": "Two Factor Authentication",
+  "@twoFactorAuthentication": {
+    "description": "Two Factor Authentication"
+  },
+
+  "twoFactorAuthDescription": "Enable two factor authentication for extra protection",
+  "@twoFactorAuthDescription": {
+    "description": "Enable two factor authentication for extra protection"
+  },
+
+  "auditLog": "Audit Log",
+  "@auditLog": {
+    "description": "Audit Log"
+  },
+
+  "auditLogDescription": "Log all important operations in the system",
+  "@auditLogDescription": {
+    "description": "Log all important operations in the system"
+  },
+
+  "passwordPolicy": "Password Policy",
+  "@passwordPolicy": {
+    "description": "Password Policy"
+  },
+
+  "securityActions": "Security Actions",
+  "@securityActions": {
+    "description": "Security Actions"
+  },
+
+  "autoAchievementApproval": "Auto Achievement Approval",
+  "@autoAchievementApproval": {
+    "description": "Auto Achievement Approval"
+  },
+
+  "autoAchievementApprovalDescription": "Approve achievements automatically without review",
+  "@autoAchievementApprovalDescription": {
+    "description": "Approve achievements automatically without review"
+  },
+
+  "modulePermissions": "Module Permissions",
+  "@modulePermissions": {
+    "description": "Module Permissions"
+  },
+
+  "userManagementActions": "User Management Actions",
+  "@userManagementActions": {
+    "description": "User Management Actions"
+  },
+
+  "maintenanceMode": "Maintenance Mode",
+  "@maintenanceMode": {
+    "description": "Maintenance Mode"
+  },
+
+  "maintenanceModeDescription": "Enable maintenance mode to prevent user access",
+  "@maintenanceModeDescription": {
+    "description": "Enable maintenance mode to prevent user access"
+  },
+
+  "automaticBackup": "Automatic Backup",
+  "@automaticBackup": {
+    "description": "Automatic Backup"
+  },
+
+  "automaticBackupDescription": "Enable automatic data backup",
+  "@automaticBackupDescription": {
+    "description": "Enable automatic data backup"
+  },
+
+  "backupFrequency": "Backup Frequency",
+  "@backupFrequency": {
+    "description": "Backup Frequency"
+  },
+
+  "backupFrequencyDescription": "Set backup creation frequency",
+  "@backupFrequencyDescription": {
+    "description": "Set backup creation frequency"
+  },
+
+  "hourly": "Hourly",
+  "@hourly": {
+    "description": "Hourly"
+  },
+
+  "daily": "Daily",
+  "@daily": {
+    "description": "Daily"
+  },
+
+  "weekly": "Weekly",
+  "@weekly": {
+    "description": "Weekly"
+  },
+
+  "monthly": "Monthly",
+  "@monthly": {
+    "description": "Monthly"
+  },
+
+  "maxFileSize": "Maximum File Size",
+  "@maxFileSize": {
+    "description": "Maximum File Size"
+  },
+
+  "maxFileSizeDescription": "Maximum size for uploaded files (in megabytes)",
+  "@maxFileSizeDescription": {
+    "description": "Maximum size for uploaded files (in megabytes)"
+  },
+
+  "systemActions": "System Actions",
+  "@systemActions": {
+    "description": "System Actions"
+  },
+
+  "apiToken": "API Token",
+  "@apiToken": {
+    "description": "API Token"
+  },
+
+  "apiTokenDescription": "API key for integration with external systems",
+  "@apiTokenDescription": {
+    "description": "API key for integration with external systems"
+  },
+
+  "externalIntegrations": "External Integrations",
+  "@externalIntegrations": {
+    "description": "External Integrations"
+  },
+
+  "webhookSettings": "Webhook Settings",
+  "@webhookSettings": {
+    "description": "Webhook Settings"
+  },
+
+  "manageWebhooks": "Manage Webhooks",
+  "@manageWebhooks": {
+    "description": "Manage Webhooks"
+  },
+
+  "settingsCategories": "Settings Categories",
+  "@settingsCategories": {
+    "description": "Settings Categories"
+  },
+
+  "chooseSettingsCategory": "Choose Settings Category",
+  "@chooseSettingsCategory": {
+    "description": "Choose Settings Category"
+  },
+
+  "currentThemeDisplay": "Theme: {theme}",
+  "@currentThemeDisplay": {
+    "description": "Current theme display",
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      }
+    }
+  },
+
+  "switchedToTheme": "Switched to {theme} theme",
+  "@switchedToTheme": {
+    "description": "Switched to theme",
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      }
+    }
+  },
+
+  "settingsSavedSuccessfully": "Settings saved successfully",
+  "@settingsSavedSuccessfully": {
+    "description": "Settings saved successfully"
+  },
+
+  "exportReportFeatureSoon": "Export report feature will be added soon",
+  "@exportReportFeatureSoon": {
+    "description": "Export report feature will be added soon"
+  },
+
+  "themeChangedTo": "Theme changed to {theme}",
+  "@themeChangedTo": {
+    "description": "Theme changed to",
+    "placeholders": {
+      "theme": {
+        "type": "String"
+      }
+    }
+  },
+
+  "themeChangeError": "Error changing theme: {error}",
+  "@themeChangeError": {
+    "description": "Error changing theme",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "systemInformation": "System Information",
+  "@systemInformation": {
+    "description": "System Information"
+  },
+
+  "version": "Version: 1.0.0",
+  "@version": {
+    "description": "Version"
+  },
+
+  "lastUpdate": "Last Update: 2025-08-07",
+  "@lastUpdate": {
+    "description": "Last Update"
+  },
+
+  "database": "Database: Firebase",
+  "@database": {
+    "description": "Database"
+  },
+
+  "server": "Server: Google Cloud",
+  "@server": {
+    "description": "Server"
+  },
+
+  "close": "Close",
+  "@close": {
+    "description": "Close"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel"
+  },
+
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm"
+  },
+
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete"
+  },
+
+  "view": "View",
+  "@view": {
+    "description": "View"
+  },
+
+  "responseRate": "Response Rate",
+  "@responseRate": {
+    "description": "Response Rate"
+  },
+
+  "userSatisfaction": "User Satisfaction",
+  "@userSatisfaction": {
+    "description": "User Satisfaction"
+  },
+
+  "efficiency": "Efficiency",
+  "@efficiency": {
+    "description": "Efficiency"
+  },
+
+  "averageReviewTime": "Average Review Time",
+  "@averageReviewTime": {
+    "description": "Average Review Time"
+  },
+
+  "monthlyCompletionRate": "Monthly Completion Rate",
+  "@monthlyCompletionRate": {
+    "description": "Monthly Completion Rate"
+  },
+
+  "overdueAchievements": "Overdue Achievements",
+  "@overdueAchievements": {
+    "description": "Overdue Achievements"
+  },
+
+  "qualityLevel": "Quality Level",
+  "@qualityLevel": {
+    "description": "Quality Level"
+  },
+
+  "clearCacheSuccessfully": "Cache cleared successfully",
+  "@clearCacheSuccessfully": {
+    "description": "Cache cleared successfully"
+  },
+
+  "creatingBackup": "Creating backup...",
+  "@creatingBackup": {
+    "description": "Creating backup..."
+  },
+
+  "exportingUserList": "Exporting user list...",
+  "@exportingUserList": {
+    "description": "Exporting user list..."
+  },
+
+  "navigateToUserManagement": "Navigate to User Management",
+  "@navigateToUserManagement": {
+    "description": "Navigate to User Management"
+  },
+
+  "exportUserReport": "Export User Report",
+  "@exportUserReport": {
+    "description": "Export User Report"
+  },
+
+  "regenerateApiToken": "Regenerate API Token",
+  "@regenerateApiToken": {
+    "description": "Regenerate API Token"
+  },
+
+  "regenerateApiTokenConfirm": "This will invalidate the current key. Do you want to continue?",
+  "@regenerateApiTokenConfirm": {
+    "description": "This will invalidate the current key. Do you want to continue?"
+  },
+
+  "general": "General",
+  "@general": {
+    "description": "General"
+  },
+
+  "security": "Security",
+  "@security": {
+    "description": "Security"
+  },
+
+  "users": "Users",
+  "@users": {
+    "description": "Users"
+  },
+
+  "system": "System",
+  "@system": {
+    "description": "System"
+  },
+
+  "integration": "Integration",
+  "@integration": {
+    "description": "Integration"
+  }
+}
